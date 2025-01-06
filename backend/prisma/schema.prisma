@@ -1,29 +1,34 @@
 datasource db {
     provider = "sqlite"
-    shadowDatabaseUrl = "true"
     url      = env("DATABASE_URL")
 }
 
 generator client {
-    provider = "prisma-client-js"
+    provider      = "prisma-client-js"
     binaryTargets = "windows"
 }
 
 model User {
-    id               Int       @id @default(autoincrement())
-    // email            String    @unique
-    password         String
-    // resetToken       String?
-    // resetTokenExpiry DateTime?
-    createdAt        DateTime  @default(now())
-    updatedAt        DateTime  @updatedAt
+    id                 Int       @id @default(autoincrement())
+    email              String    @unique
+    password           String
+    resetPasswordToken String?
+    tokenExpiresAt     DateTime?
+    otpSecret          String? // For storing OTP secret
+    otpEnabled         Boolean   @default(false)
+    otpVerified        Boolean   @default(false)
+    createdAt          DateTime  @default(now())
+    updatedAt          DateTime  @updatedAt
 }
 
 model ProductionData {
     id           Int           @id @default(autoincrement())
     date         DateTime
-    produced     Int
-    remains      Int
+    purchased    Int           @default(0)
+    produced     Int           @default(0)
+    stock        Int           @default(0)
+    sales        Int           @default(0)
+    remains      Int           @default(0)
     expenditures Expenditure[]
     createdAt    DateTime      @default(now())
     updatedAt    DateTime      @updatedAt
@@ -34,7 +39,7 @@ model ProductionData {
 model Expenditure {
     id             Int            @id @default(autoincrement())
     name           String
-    amount         Float
+    amount         Int            @default(0)
     productionData ProductionData @relation(fields: [productionId], references: [id])
     productionId   Int
     createdAt      DateTime       @default(now())
