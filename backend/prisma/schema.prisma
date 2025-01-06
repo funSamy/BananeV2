@@ -1,0 +1,44 @@
+datasource db {
+    provider = "sqlite"
+    shadowDatabaseUrl = "true"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+    binaryTargets = "windows"
+}
+
+model User {
+    id               Int       @id @default(autoincrement())
+    // email            String    @unique
+    password         String
+    // resetToken       String?
+    // resetTokenExpiry DateTime?
+    createdAt        DateTime  @default(now())
+    updatedAt        DateTime  @updatedAt
+}
+
+model ProductionData {
+    id           Int           @id @default(autoincrement())
+    date         DateTime
+    produced     Int
+    remains      Int
+    expenditures Expenditure[]
+    createdAt    DateTime      @default(now())
+    updatedAt    DateTime      @updatedAt
+
+    @@index([date])
+}
+
+model Expenditure {
+    id             Int            @id @default(autoincrement())
+    name           String
+    amount         Float
+    productionData ProductionData @relation(fields: [productionId], references: [id])
+    productionId   Int
+    createdAt      DateTime       @default(now())
+    updatedAt      DateTime       @updatedAt
+
+    @@index([productionId])
+}
