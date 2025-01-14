@@ -23,7 +23,7 @@ model User {
 
 model ProductionData {
     id           Int           @id @default(autoincrement())
-    date         DateTime
+    date         DateTime      @unique
     purchased    Int           @default(0)
     produced     Int           @default(0)
     stock        Int           @default(0)

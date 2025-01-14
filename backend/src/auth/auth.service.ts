@@ -45,13 +45,10 @@ export class AuthService {
     });
 
     return {
-      success: true,
-      data: {
-        token,
-        user: {
-          id: user.id,
-          email: user.email,
-        },
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
       },
     };
   }

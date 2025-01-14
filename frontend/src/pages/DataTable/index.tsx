@@ -19,6 +19,7 @@ import {
   useReactTable,
   FilterFn,
   Row,
+  PaginationState,
 } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,22 +32,20 @@ import { columns } from "./columns";
 import { ChevronDown } from "lucide-react";
 import { DatePickerWithRange } from "@/components/ui/date-range-picker";
 import type { DateRange } from "react-day-picker";
-import { generateMockData } from "@/data/mocks";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { format } from "date-fns";
 import { DataForm } from "@/components/forms/data-form";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DataEntry } from "@/types/data";
 import { toast } from "sonner";
+import { useProductionTable } from "@/hooks/production/use-production-table";
+import { useUpdateProduction } from "@/hooks/production/use-production-data";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
     dateRange: FilterFn<unknown>;
   }
 }
-
-// Mock data - replace with actual API call
-const data = generateMockData(1200);
 
 export default function DataTablePage() {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -58,38 +57,67 @@ export default function DataTablePage() {
     to: undefined,
   });
   const [editingRow, setEditingRow] = useState<Row<DataEntry> | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+
+  // Convert TanStack Table pagination to API format
+  const pagination = {
+    page: pageIndex + 1,
+    pageSize,
+  };
+
+  // Fetch data using the hook
+  const { data: tableData, isLoading } = useProductionTable(
+    pagination,
+    sorting,
+    date
+  );
+
+  // Update mutation
+  const updateMutation = useUpdateProduction();
 
   const handleEditRow = useCallback((row: Row<DataEntry>) => {
     setEditingRow(row);
   }, []);
 
-  const handleEditSubmit = useCallback(async (data: any) => {
-    try {
-      setIsSubmitting(true);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log({ data });
-      toast.success("Data updated successfully!");
-      setEditingRow(null);
-    } catch {
-      toast.error("Failed to update data");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, []);
+  const handleEditSubmit = useCallback(
+    async (data: unknown) => {
+      try {
+        const { id, ...rest } = data as DataEntry;
+
+        await updateMutation.mutateAsync({
+          id,
+          data: {
+            ...rest,
+            date: rest.date.toISOString(),
+          },
+        });
+        toast.success("Data updated successfully!");
+        setEditingRow(null);
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to update data");
+      }
+    },
+    [updateMutation]
+  );
 
   const table = useReactTable<DataEntry>({
-    data,
+    data: tableData?.data ?? [],
+    pageCount: tableData?.pagination?.pageCount,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    manualPagination: true,
     meta: {
       handleEditRow,
     },
@@ -114,6 +142,10 @@ export default function DataTablePage() {
       columnFilters,
       columnVisibility,
       rowSelection,
+      pagination: {
+        pageIndex,
+        pageSize,
+      },
     },
   });
 
@@ -205,7 +237,16 @@ export default function DataTablePage() {
               ))}
             </TableHeader>
             <TableBody>
-              {table.getRowModel().rows?.length ? (
+              {isLoading ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center text-primary"
+                  >
+                    Loading...
+                  </TableCell>
+                </TableRow>
+              ) : table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow
                     key={row.id}
@@ -225,7 +266,7 @@ export default function DataTablePage() {
                 <TableRow>
                   <TableCell
                     colSpan={columns.length}
-                    className="h-24 text-center"
+                    className="h-24 text-center text-primary"
                   >
                     No results.
                   </TableCell>
@@ -243,10 +284,10 @@ export default function DataTablePage() {
         open={!!editingRow}
         onOpenChange={(open) => !open && setEditingRow(null)}
       >
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto text-primary">
           <DataForm
             onSubmit={handleEditSubmit}
-            isSubmitting={isSubmitting}
+            isSubmitting={updateMutation.isPending}
             defaultValues={editingRow?.original}
             submitLabel="Save Changes"
           />

@@ -21,9 +21,9 @@ export class ResponseInterceptor<T>
         (data) =>
           ({
             success: true,
-            data,
-            message: data.message,
-          }) as ApiSuccess<T>,
+            data: data?.data ?? data,
+            ...(data?.message && { message: data.message }),
+          }) satisfies ApiSuccess<T>,
       ),
     );
   }

@@ -17,14 +17,14 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@radix-ui/react-popover";
-import { CalendarIcon, Plus, Trash2 } from "lucide-react";
+import { CalendarIcon, Loader, Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { Control, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
 // Move constants outside component
 const MIN_DATE = new Date("2016-01-01");
-const MAX_DATE = new Date(new Date().setHours(0, 0, 0, 0));
+const MAX_DATE = new Date(new Date().setHours(23, 59, 59, 999));
 const ALLOWED_KEYS = [
   "Backspace",
   "Delete",
@@ -47,6 +47,14 @@ const formSchema = z.object({
       message: "The date can't be earlier the 2016",
     })
     .max(MAX_DATE, { message: "The date can't be in the future" }),
+  purchased: z.coerce
+    .number({
+      coerce: true,
+      message: "Amount must be a number",
+      invalid_type_error: "Amount must be a number",
+      required_error: "The amount is required",
+    })
+    .gte(0, "The amount can't be less than 0"),
   produced: z.coerce
     .number({
       coerce: true,
@@ -54,8 +62,8 @@ const formSchema = z.object({
       invalid_type_error: "Amount must be a number",
       required_error: "The amount is required",
     })
-    .gte(50, "The amount can't be less than 50"),
-  remains: z.coerce
+    .gte(0, "The amount can't be less than 0"),
+  sales: z.coerce
     .number({
       coerce: true,
       message: "Amount must be a number",
@@ -175,10 +183,9 @@ export function DataForm({
     resolver: zodResolver(formSchema),
     defaultValues: useMemo(
       () => ({
-        date: new Date(),
+        date: new Date(new Date().setHours(0, 0, 0, 0)),
         remains: 0,
         produced: 0,
-        expenditures: [{ name: "", amount: 0 }],
         ...defaultValues,
       }),
       [defaultValues]
@@ -201,14 +208,20 @@ export function DataForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          form.handleSubmit(onSubmit)(e);
+        }}
+        className="space-y-8"
+      >
         {/* Date Field */}
         <FormField
           control={form.control}
           name="date"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Date</FormLabel>
+              <FormLabel className="text-primary">Date</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -246,11 +259,11 @@ export function DataForm({
         />
 
         {/* Numeric Fields */}
-        {["produced", "remains"].map((fieldName) => (
+        {["purchased", "produced", "sales"].map((fieldName) => (
           <FormField
             key={fieldName}
             control={form.control}
-            name={fieldName as "produced" | "remains"}
+            name={fieldName as "purchased" | "produced" | "sales"}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
@@ -299,7 +312,11 @@ export function DataForm({
         </div>
 
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Submitting..." : submitLabel}
+          {isSubmitting ? (
+            <Loader className="animate-spin text-primaryForeground" />
+          ) : (
+            submitLabel
+          )}
         </Button>
       </form>
     </Form>

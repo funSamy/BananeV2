@@ -1,24 +1,29 @@
-import { useState, useCallback } from "react";
 import { DataForm, InputDataType } from "@/components/forms/data-form";
 import { Separator } from "@/components/ui/separator";
+import { useCreateProduction } from "@/hooks/production/use-production-data";
+import { ProductionData } from "@/types/api";
 import { toast } from "sonner";
 
 export default function NewData() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const createMutation = useCreateProduction();
 
-  const onSubmit = useCallback(async (data: InputDataType) => {
+  const onSubmit = async (data: InputDataType) => {
     try {
-      setIsSubmitting(true);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log({ data });
+      const finalData = {
+        date: new Date(data.date).toISOString().split("T")[0],
+        purchased: data.purchased,
+        produced: data.produced,
+        sales: data.sales,
+        expenditures: data.expenditures,
+      } satisfies Omit<ProductionData, "id" | "stock" | "remains">;
+
+      await createMutation.mutateAsync(finalData);
       toast.success("Data submitted successfully!");
-    } catch {
+    } catch (error) {
       toast.error("Failed to submit data");
-    } finally {
-      setIsSubmitting(false);
+      console.error("Error: ", error);
     }
-  }, []);
+  };
 
   return (
     <div className="text-primary max-w-xl p-8 mx-auto">
@@ -29,7 +34,7 @@ export default function NewData() {
       <Separator className="my-8" />
       <DataForm
         onSubmit={onSubmit}
-        isSubmitting={isSubmitting}
+        isSubmitting={createMutation.isPending}
         submitLabel="Add Data"
       />
     </div>

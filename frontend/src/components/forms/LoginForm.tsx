@@ -20,14 +20,17 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Eye, EyeOff, Loader } from "lucide-react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useLogin } from "@/hooks/auth/use-login";
+import { toast } from "sonner";
 
 const formSchema = z.object({
+  email: z.string().email({ message: "Invalid email address" }),
   password: z
     .string()
     .trim()
-    .min(4, { message: "Password must be at least 4 characters" })
+    .min(6, { message: "Password must be at least 6 characters" })
     .max(20, { message: "Password must be at most 20 characters" }),
 });
 
@@ -38,19 +41,37 @@ export default function LoginForm({
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const [showPassword, setShowPassword] = useState(false);
+  const login = useLogin();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      email: "admin@admin.com",
       password: "",
     },
   });
 
-  function onSubmit(values: FormSchema) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
-  }
+  const onSubmit = async (values: FormSchema) => {
+    try {
+      const response = await login.mutateAsync(values);
+      console.log({ response });
+
+      // Check for returnUrl in search params
+      const returnUrl = searchParams.get("returnUrl");
+      if (returnUrl) {
+        // Decode and navigate to the return URL
+        navigate(decodeURIComponent(returnUrl), { replace: true });
+      } else {
+        // Default redirect to dashboard
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      toast.error("Login failed. Please check your credentials.");
+      console.error(error);
+    }
+  };
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -62,9 +83,32 @@ export default function LoginForm({
         <CardContent>
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit(onSubmit)}
+              onSubmit={(e) => {
+                e.preventDefault();
+                form.handleSubmit(onSubmit)(e);
+              }}
               className="space-y-8 grid"
+              autoComplete="off"
             >
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        disabled={true}
+                        placeholder="Enter your email"
+                        autoComplete="off"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="password"
@@ -76,6 +120,7 @@ export default function LoginForm({
                         <Input
                           type={showPassword ? "text" : "password"}
                           placeholder="••••••"
+                          autoComplete="off"
                           {...field}
                         />
                         <Button
@@ -105,7 +150,13 @@ export default function LoginForm({
                   Forgot your password?
                 </Link>
               </span>
-              <Button type="submit">Submit</Button>
+              <Button type="submit" disabled={login.isPending}>
+                {login.isPending ? (
+                  <Loader className="animate-spin text-primaryForeground" />
+                ) : (
+                  "Login"
+                )}
+              </Button>
             </form>
           </Form>
         </CardContent>

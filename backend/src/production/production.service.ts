@@ -12,14 +12,14 @@ export class ProductionService {
   async create(createProductionDto: CreateProductionDto) {
     const { expenditures, ...productionData } = createProductionDto;
 
+    const stock = productionData.produced;
+    const remains =
+      stock - productionData.sales > 0 ? stock - productionData.sales : 0;
     const data = await this.prisma.productionData.create({
       data: {
         ...productionData,
-        remains: productionData.produced - (productionData.sales || 0),
-        stock:
-          (productionData.purchased || 0) +
-          (productionData.produced || 0) -
-          (productionData.sales || 0),
+        remains,
+        stock,
         expenditures: {
           create: expenditures,
         },
@@ -54,16 +54,15 @@ export class ProductionService {
     if (startDate && !endDate) {
       dateFilter = {
         gte: startDate,
-        lt: new Date(startDate.getTime() + 24 * 60 * 60 * 1000), // Next day
       };
     } else if (!startDate && endDate) {
       dateFilter = {
-        lt: new Date(endDate.getTime() + 24 * 60 * 60 * 1000), // Next day
+        lte: new Date(endDate.getTime() + 24 * 60 * 60 * 1000), // Next day
       };
     } else if (startDate && endDate) {
       dateFilter = {
         gte: startDate,
-        lt: new Date(endDate.getTime() + 24 * 60 * 60 * 1000), // Next day
+        lte: new Date(endDate.getTime() + 24 * 60 * 60 * 1000), // Next day
       };
     }
 
