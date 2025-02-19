@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductionDto } from './dto/create-production.dto';
 import { ProductionQueryDto, SortOrder } from './dto/production-query.dto';
@@ -11,6 +11,17 @@ export class ProductionService {
 
   async create(createProductionDto: CreateProductionDto) {
     const { expenditures, ...productionData } = createProductionDto;
+
+    // Check if record with the same date exists
+    const existingData = await this.prisma.productionData.findUnique({
+      where: {
+        date: productionData.date,
+      },
+    });
+
+    if (existingData) {
+      throw new ConflictException(`Data for ${productionData.date.toUTCString()} already exists`);
+    }
 
     const stock = productionData.produced;
     const remains =
@@ -30,14 +41,12 @@ export class ProductionService {
     });
 
     return {
-      success: true,
       data,
       message: 'Production data created successfully',
     };
   }
 
   async findAll(query: ProductionQueryDto) {
-    console.log('Query:', query);
     const {
       page = 1,
       pageSize = 20,
@@ -71,8 +80,6 @@ export class ProductionService {
       ...filters,
     };
 
-    console.log('Where clause:', where);
-
     const [total, data] = await Promise.all([
       this.prisma.productionData.count({ where }),
       this.prisma.productionData.findMany({
@@ -91,7 +98,6 @@ export class ProductionService {
     const pageCount = Math.ceil(total / pageSize);
 
     return {
-      success: true,
       data: {
         items: data,
         pagination: {
@@ -119,7 +125,6 @@ export class ProductionService {
     }
 
     return {
-      success: true,
       data: production,
     };
   }
@@ -138,27 +143,27 @@ export class ProductionService {
     // Handle expenditures update
     const expendituresUpdate = expenditures
       ? {
-          // Delete expenditures that aren't in the new list
-          deleteMany: {
-            id: {
-              notIn: expenditures.filter((e) => e.id).map((e) => e.id),
-            },
+        // Delete expenditures that aren't in the new list
+        deleteMany: {
+          id: {
+            notIn: expenditures.filter((e) => e.id).map((e) => e.id),
           },
-          // Update existing and create new ones
-          upsert: expenditures.map((exp) => ({
-            where: {
-              id: exp.id || -1, // -1 for new expenditures
-            },
-            create: {
-              name: exp.name,
-              amount: exp.amount,
-            },
-            update: {
-              name: exp.name,
-              amount: exp.amount,
-            },
-          })),
-        }
+        },
+        // Update existing and create new ones
+        upsert: expenditures.map((exp) => ({
+          where: {
+            id: exp.id || -1, // -1 for new expenditures
+          },
+          create: {
+            name: exp.name,
+            amount: exp.amount,
+          },
+          update: {
+            name: exp.name,
+            amount: exp.amount,
+          },
+        })),
+      }
       : undefined;
 
     return this.prisma.productionData.update({
@@ -184,7 +189,6 @@ export class ProductionService {
     });
 
     return {
-      success: true,
       message: 'Production data deleted successfully',
     };
   }
