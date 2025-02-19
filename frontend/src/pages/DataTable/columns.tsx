@@ -157,7 +157,7 @@ export const columns: ColumnDef<DataEntry>[] = [
       const expenditures = row.getValue(
         "expenditures"
       ) as DataEntry["expenditures"];
-      const total = expenditures.reduce((sum, exp) => sum + exp.amount, 0);
+      const total = expenditures!.reduce((sum, exp) => sum + exp.amount, 0);
 
       return (
         <div className="text-center text-primary">
@@ -179,7 +179,7 @@ export const columns: ColumnDef<DataEntry>[] = [
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
-                {expenditures.map((exp, i) => (
+                {expenditures!.map((exp, i) => (
                   <div
                     key={i}
                     className="flex justify-between text-secondaryForeground items-center"

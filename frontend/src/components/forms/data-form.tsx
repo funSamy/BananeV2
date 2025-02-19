@@ -166,10 +166,11 @@ const ExpenditureField = memo(
 
 ExpenditureField.displayName = "ExpenditureField";
 
+type TDataInput = InputDataType & { id?: number };
 interface DataFormProps {
-  onSubmit: (data: InputDataType) => Promise<void>;
+  onSubmit: (data: TDataInput) => Promise<void>;
   isSubmitting?: boolean;
-  defaultValues?: Partial<InputDataType>;
+  defaultValues?: Partial<TDataInput>;
   submitLabel?: string;
 }
 
@@ -211,7 +212,7 @@ export function DataForm({
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          form.handleSubmit(onSubmit)(e);
+          form.handleSubmit((d) => onSubmit({ ...d, id: defaultValues?.id }))(e);
         }}
         className="space-y-8"
       >
