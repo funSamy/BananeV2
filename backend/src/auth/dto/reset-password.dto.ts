@@ -5,6 +5,8 @@ export class ResetPasswordDto {
   token: string;
 
   @IsString({ message: 'New password must be a string' })
-  @Length(6, 20, { message: 'New password must be between 6 and 20 characters' })
+  @Length(6, 20, {
+    message: 'New password must be between 6 and 20 characters',
+  })
   newPassword: string;
 }

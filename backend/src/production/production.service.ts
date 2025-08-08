@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductionDto } from './dto/create-production.dto';
 import { ProductionQueryDto, SortOrder } from './dto/production-query.dto';
@@ -20,7 +24,9 @@ export class ProductionService {
     });
 
     if (existingData) {
-      throw new ConflictException(`Data for ${productionData.date.toUTCString()} already exists`);
+      throw new ConflictException(
+        `Data for ${productionData.date.toUTCString()} already exists`,
+      );
     }
 
     const stock = productionData.produced;
@@ -143,27 +149,27 @@ export class ProductionService {
     // Handle expenditures update
     const expendituresUpdate = expenditures
       ? {
-        // Delete expenditures that aren't in the new list
-        deleteMany: {
-          id: {
-            notIn: expenditures.filter((e) => e.id).map((e) => e.id),
+          // Delete expenditures that aren't in the new list
+          deleteMany: {
+            id: {
+              notIn: expenditures.filter((e) => e.id).map((e) => e.id),
+            },
           },
-        },
-        // Update existing and create new ones
-        upsert: expenditures.map((exp) => ({
-          where: {
-            id: exp.id || -1, // -1 for new expenditures
-          },
-          create: {
-            name: exp.name,
-            amount: exp.amount,
-          },
-          update: {
-            name: exp.name,
-            amount: exp.amount,
-          },
-        })),
-      }
+          // Update existing and create new ones
+          upsert: expenditures.map((exp) => ({
+            where: {
+              id: exp.id || -1, // -1 for new expenditures
+            },
+            create: {
+              name: exp.name,
+              amount: exp.amount,
+            },
+            update: {
+              name: exp.name,
+              amount: exp.amount,
+            },
+          })),
+        }
       : undefined;
 
     return this.prisma.productionData.update({
