@@ -19,7 +19,8 @@
     "columns": "Columns",
     "actions": "Actions",
     "toggleTheme": "Toggle theme",
-    "openSidebar": "Open sidebar"
+    "openSidebar": "Open sidebar",
+    "switchLanguage": "Switch language"
   },
   "auth": {
     "login": "Login",

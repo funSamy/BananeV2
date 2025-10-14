@@ -142,7 +142,7 @@ export default function AppSideBar() {
             </TooltipTrigger>
             {state === "collapsed" && (
               <TooltipContent side="right">
-                <p>Switch language</p>
+                <p>{t("common.switchLanguage")}</p>
               </TooltipContent>
             )}
           </Tooltip>

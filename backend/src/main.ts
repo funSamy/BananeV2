@@ -7,22 +7,32 @@ import {
 } from '@nestjs/common';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
+import { NextFunction, Request, Response } from 'express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Enable CORS
+  // Enable CORS (still needed for development/external access)
   app.enableCors({
-    origin: ['http://localhost', 'http://localhost:3000'],
+    origin: [
+      'http://localhost',
+      'http://localhost:3000',
+      'http://localhost:5000',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   });
 
+  // Set global prefix for API routes
+  app.setGlobalPrefix('api');
+
   // Enable versioning with /api/v1 prefix
   app.enableVersioning({
     type: VersioningType.URI,
-    prefix: 'api/v',
+    prefix: 'v',
     defaultVersion: '1',
   });
 
@@ -49,6 +59,26 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  await app.listen(process.env.PORT ?? 5000);
+  // Serve static files from frontend build
+  const frontendPath = join(__dirname, '..', '..', '..', 'frontend', 'dist');
+  app.useStaticAssets(frontendPath, {
+    index: false, // Disable automatic index serving to handle SPA routing
+  });
+
+  // Serve index.html for all non-API routes (SPA fallback)
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (!req.url.startsWith('/api')) {
+      res.sendFile(join(frontendPath, 'index.html'));
+    } else {
+      next();
+    }
+  });
+
+  const port = process.env.PORT ?? 5000;
+  await app.listen(port);
+
+  console.log(`🚀 Application is running on: http://localhost:${port}`);
+  console.log(`📦 Serving frontend from: ${frontendPath}`);
+  console.log(`🔌 API endpoints available at: http://localhost:${port}/api/v1`);
 }
 bootstrap();

@@ -19,7 +19,8 @@
     "columns": "Colonnes",
     "actions": "Actions",
     "toggleTheme": "Changer le thème",
-    "openSidebar": "Ouvrir la barre latérale"
+    "openSidebar": "Ouvrir la barre latérale",
+    "switchLanguage": "Changer de langue"
   },
   "auth": {
     "login": "Connexion",
