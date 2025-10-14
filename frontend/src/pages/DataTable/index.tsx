@@ -40,6 +40,7 @@ import { DataEntry } from "@/types/data";
 import { toast } from "sonner";
 import { useProductionTable } from "@/hooks/production/use-production-table";
 import { useUpdateProduction } from "@/hooks/production/use-production-data";
+import { useTranslation } from "react-i18next";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -48,6 +49,7 @@ declare module "@tanstack/table-core" {
 }
 
 export default function DataTablePage() {
+  const { t } = useTranslation();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -94,16 +96,16 @@ export default function DataTablePage() {
             date: rest.date.toISOString(),
           },
         });
-        toast.success("Data updated successfully!", {
+        toast.success(t("dataTable.editSuccess"), {
           description: res.message,
         });
         setEditingRow(null);
       } catch (error) {
         console.error(error);
-        toast.error("Failed to update data");
+        toast.error(t("dataTable.editFailed"));
       }
     },
-    [updateMutation]
+    [updateMutation, t]
   );
 
   const table = useReactTable<DataEntry>({
@@ -172,7 +174,7 @@ export default function DataTablePage() {
       ? visibleMonths.length === 1
         ? visibleMonths[0]
         : `${visibleMonths[0]} - ${visibleMonths[visibleMonths.length - 1]}`
-      : "No data";
+      : t("common.noData");
 
   return (
     <>
@@ -180,7 +182,7 @@ export default function DataTablePage() {
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl text-primary font-bold tracking-tight">
-              Data Table
+              {t("dataTable.title")}
             </h2>
             <div className="text-sm text-accentForeground font-medium bg-accent px-3 py-1 rounded-md">
               {monthsDisplay}
@@ -193,7 +195,7 @@ export default function DataTablePage() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="ml-auto">
-                  Columns <ChevronDown className="ml-2 h-4 w-4" />
+                  {t("common.columns")} <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -255,7 +257,7 @@ export default function DataTablePage() {
                     className="h-24 text-center text-primary"
                   >
                     <AlertCircle className="fill-red-500" />
-                    Failed to load data.
+                    {t("dashboard.failedToLoad")}
                   </TableCell>
                 </TableRow>
               ) : table.getRowModel().rows?.length ? (
@@ -280,7 +282,7 @@ export default function DataTablePage() {
                     colSpan={columns.length}
                     className="h-24 text-center text-primary"
                   >
-                    No results.
+                    {t("common.noResults")}
                   </TableCell>
                 </TableRow>
               )}
@@ -301,7 +303,7 @@ export default function DataTablePage() {
             onSubmit={handleEditSubmit}
             isSubmitting={updateMutation.isPending}
             defaultValues={editingRow?.original}
-            submitLabel="Save Changes"
+            submitLabel={t("dataTable.saveChanges")}
           />
         </DialogContent>
       </Dialog>

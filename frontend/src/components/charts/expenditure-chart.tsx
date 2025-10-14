@@ -5,6 +5,7 @@ import {
   ChartContainer,
   ChartTooltip,
 } from "../ui/chart";
+import { useTranslation } from "react-i18next";
 
 export const chartConfig: ChartConfig = {
   transport: {
@@ -47,11 +48,12 @@ export function ExpenditureChart({
   currencyFormatter,
 }: ExpenditureChartProps) {
   const COLORS = Object.values(chartConfig).map((config) => config.color);
+  const { t } = useTranslation();
 
   return (
     <Card className="col-span-3">
       <CardHeader>
-        <CardTitle>Expenditure Distribution</CardTitle>
+        <CardTitle>{t("dashboard.expenditureDistribution")}</CardTitle>
       </CardHeader>
       <CardContent className="flex items-center justify-center">
         <ChartContainer

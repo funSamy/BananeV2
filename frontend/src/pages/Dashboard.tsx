@@ -18,6 +18,7 @@ import {
 import { DateRange } from "react-day-picker";
 import { useState, useMemo, ReactNode } from "react";
 import { useProductionList } from "@/hooks/production/use-production-data";
+import { useTranslation } from "react-i18next";
 
 // Formatter functions
 const compactNumberFormatter = (value: number) => {
@@ -39,6 +40,7 @@ const compactCurrencyFormatter = (value: number) => {
 const TOP_EXPENSES_COUNT = 5;
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const [date, setDate] = useState<DateRange | undefined>({
     from: subMonths(new Date(), 6),
     to: new Date(),
@@ -211,7 +213,9 @@ export default function Dashboard() {
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        <h2 className="text-3xl font-bold tracking-tight">
+          {t("dashboard.title")}
+        </h2>
         <div className="flex items-center space-x-2">
           <LoadingIndicator>
             <DatePickerWithRange
@@ -227,7 +231,7 @@ export default function Dashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Production
+              {t("dashboard.totalProduction")}
             </CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -237,30 +241,12 @@ export default function Dashboard() {
                 {compactNumberFormatter(metrics.totalProduced)}
               </div>
               <p className="text-xs text-muted-foreground">
-                Units produced{" "}
+                {t("dashboard.unitsProduced")}{" "}
                 {date?.from
-                  ? `since ${format(date.from, "MMM d, yyyy")}`
-                  : "this period"}
-              </p>
-            </LoadingIndicator>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <LoadingIndicator>
-              <div className="text-2xl font-bold">
-                {compactNumberFormatter(metrics.totalSales)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Units sold{" "}
-                {date?.from
-                  ? `since ${format(date.from, "MMM d, yyyy")}`
-                  : "this period"}
+                  ? t("dashboard.since", {
+                      date: format(date.from, "MMM d, yyyy"),
+                    })
+                  : t("dashboard.thisPeriod")}
               </p>
             </LoadingIndicator>
           </CardContent>
@@ -269,7 +255,31 @@ export default function Dashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Expenses
+              {t("dashboard.totalSales")}
+            </CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <LoadingIndicator>
+              <div className="text-2xl font-bold">
+                {compactNumberFormatter(metrics.totalSales)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t("dashboard.unitsSold")}{" "}
+                {date?.from
+                  ? t("dashboard.since", {
+                      date: format(date.from, "MMM d, yyyy"),
+                    })
+                  : t("dashboard.thisPeriod")}
+              </p>
+            </LoadingIndicator>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              {t("dashboard.totalExpenses")}
             </CardTitle>
             <TrendingDown className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -279,10 +289,12 @@ export default function Dashboard() {
                 {compactCurrencyFormatter(metrics.totalExpenses)}
               </div>
               <p className="text-xs text-muted-foreground">
-                Total expenditures{" "}
+                {t("dashboard.totalExpenditures")}{" "}
                 {date?.from
-                  ? `since ${format(date.from, "MMM d, yyyy")}`
-                  : "this period"}
+                  ? t("dashboard.since", {
+                      date: format(date.from, "MMM d, yyyy"),
+                    })
+                  : t("dashboard.thisPeriod")}
               </p>
             </LoadingIndicator>
           </CardContent>
@@ -290,7 +302,9 @@ export default function Dashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Revenue</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("dashboard.revenue")}
+            </CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -299,10 +313,12 @@ export default function Dashboard() {
                 {compactCurrencyFormatter(metrics.revenue)}
               </div>
               <p className="text-xs text-muted-foreground">
-                Net revenue{" "}
+                {t("dashboard.netRevenue")}{" "}
                 {date?.from
-                  ? `since ${format(date.from, "MMM d, yyyy")}`
-                  : "this period"}
+                  ? t("dashboard.since", {
+                      date: format(date.from, "MMM d, yyyy"),
+                    })
+                  : t("dashboard.thisPeriod")}
               </p>
             </LoadingIndicator>
           </CardContent>

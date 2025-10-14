@@ -24,6 +24,7 @@ import { Eye, EyeOff, Loader } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useLogin } from "@/hooks/auth/use-login";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
@@ -44,6 +45,7 @@ export default function LoginForm({
   const login = useLogin();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { t } = useTranslation();
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -68,7 +70,7 @@ export default function LoginForm({
         navigate("/dashboard");
       }
     } catch (error) {
-      toast.error("Login failed. Please check your credentials.");
+      toast.error(t("auth.loginFailed"));
       console.error(error);
     }
   };
@@ -81,8 +83,10 @@ export default function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Login</CardTitle>
-          <CardDescription>Enter the password for your account</CardDescription>
+          <CardTitle className="text-2xl font-bold">
+            {t("auth.login")}
+          </CardTitle>
+          <CardDescription>{t("auth.enterPassword")}</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -99,12 +103,12 @@ export default function LoginForm({
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>{t("auth.email")}</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
                         disabled={true}
-                        placeholder="Enter your email"
+                        placeholder={t("auth.enterYourEmail")}
                         autoComplete="off"
                         {...field}
                       />
@@ -118,7 +122,7 @@ export default function LoginForm({
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>{t("auth.password")}</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
@@ -151,14 +155,14 @@ export default function LoginForm({
                   to="/forgot-password"
                   className="text-sm text-primary font-medium hover:underline"
                 >
-                  Forgot your password?
+                  {t("auth.forgotPassword")}
                 </Link>
               </span>
               <Button type="submit" disabled={login.isPending}>
                 {login.isPending ? (
                   <Loader className="animate-spin text-primaryForeground" />
                 ) : (
-                  "Login"
+                  t("auth.login")
                 )}
               </Button>
             </form>

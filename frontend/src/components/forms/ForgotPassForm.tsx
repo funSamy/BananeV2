@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { useForgotPassword } from "@/hooks/auth/use-forgot-password";
 import { useResetPassword } from "@/hooks/auth/use-reset-password";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const formSchema = z
   .object({
@@ -56,6 +57,7 @@ export default function ForgotPassForm({
   const forgotPass = useForgotPassword();
   const resetPass = useResetPassword();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -90,17 +92,19 @@ export default function ForgotPassForm({
         token: passwordToken,
       })
       .then(() => navigate("/login"));
-      // .catch((error) =>
-      //   toast.error("An error occured", { description: error.message })
-      // );
+    // .catch((error) =>
+    //   toast.error("An error occured", { description: error.message })
+    // );
   }
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Reset Password</CardTitle>
-          <CardDescription>Enter your new password below</CardDescription>
+          <CardTitle className="text-2xl font-bold">
+            {t("auth.resetPassword")}
+          </CardTitle>
+          <CardDescription>{t("auth.enterNewPassword")}</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -113,7 +117,7 @@ export default function ForgotPassForm({
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>New Password</FormLabel>
+                    <FormLabel>{t("auth.newPassword")}</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
@@ -145,7 +149,7 @@ export default function ForgotPassForm({
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
+                    <FormLabel>{t("auth.confirmPassword")}</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
@@ -174,7 +178,7 @@ export default function ForgotPassForm({
                   </FormItem>
                 )}
               />
-              <Button type="submit">Reset Password</Button>
+              <Button type="submit">{t("auth.resetPassword")}</Button>
             </form>
           </Form>
         </CardContent>

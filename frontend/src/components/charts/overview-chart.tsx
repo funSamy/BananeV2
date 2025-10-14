@@ -8,6 +8,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "../ui/chart";
+import { useTranslation } from "react-i18next";
 
 interface OverviewChartProps {
   data: {
@@ -30,10 +31,11 @@ const chartConfig: ChartConfig = {
 };
 
 export function OverviewChart({ data }: OverviewChartProps) {
+  const { t } = useTranslation();
   return (
     <Card className="col-span-4">
       <CardHeader>
-        <CardTitle>Production & Sales Overview</CardTitle>
+        <CardTitle>{t("dashboard.prodSales")}</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>

@@ -22,7 +22,9 @@ import {
 import logo from "/assets/images/banana.jpg";
 import { LayoutDashboard, LucideProps, PlusSquare, Table2 } from "lucide-react";
 import { ModeToggle } from "../theme/mode-toggle";
+import { LanguageSwitcher } from "../theme/language-switcher";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface IMenuItem {
   title: string;
@@ -32,20 +34,19 @@ interface IMenuItem {
   >;
 }
 
-// menu items
-const items: IMenuItem[] = [
+const getMenuItems = (t: (key: string) => string): IMenuItem[] => [
   {
-    title: "Dashboard",
+    title: t("nav.dashboard"),
     url: "/dashboard",
     icon: LayoutDashboard,
   },
   {
-    title: "New Data",
+    title: t("nav.newData"),
     url: "/new",
     icon: PlusSquare,
   },
   {
-    title: "Data Table",
+    title: t("nav.dataTable"),
     url: "/data",
     icon: Table2,
   },
@@ -55,6 +56,8 @@ export default function AppSideBar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { state } = useSidebar();
+  const { t } = useTranslation();
+  const items = getMenuItems(t);
 
   return (
     <Sidebar collapsible="icon" accessKey="">
@@ -76,7 +79,7 @@ export default function AppSideBar() {
               className="w-8 h-8 object-contain rounded-lg"
             />
             <span className="text-primary font-bold text-xl">
-              Gestion Banane
+              {t("common.appName")}
             </span>
           </SidebarGroupLabel>
           <SidebarSeparator />
@@ -125,7 +128,21 @@ export default function AppSideBar() {
             </TooltipTrigger>
             {state === "collapsed" && (
               <TooltipContent side="right">
-                <p>Toggle theme</p>
+                <p>{t("common.toggleTheme")}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild className="w-fit">
+              <div>
+                <LanguageSwitcher />
+              </div>
+            </TooltipTrigger>
+            {state === "collapsed" && (
+              <TooltipContent side="right">
+                <p>Switch language</p>
               </TooltipContent>
             )}
           </Tooltip>
@@ -142,7 +159,7 @@ export default function AppSideBar() {
             </TooltipTrigger>
             {state === "collapsed" && (
               <TooltipContent side="right">
-                <p>Open sidebar</p>
+                <p>{t("common.openSidebar")}</p>
               </TooltipContent>
             )}
           </Tooltip>

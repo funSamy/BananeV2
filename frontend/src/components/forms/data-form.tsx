@@ -21,6 +21,7 @@ import { CalendarIcon, Loader, Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { Control, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 
 // Move constants outside component
 const MIN_DATE = new Date("2016-01-01");
@@ -94,10 +95,11 @@ interface ExpenditureFieldProps {
   index: number;
   control: Control<InputDataType>;
   remove: (index: number) => void;
+  t: (key: string) => string;
 }
 
 const ExpenditureField = memo(
-  ({ index, control, remove }: ExpenditureFieldProps) => {
+  ({ index, control, remove, t }: ExpenditureFieldProps) => {
     const handleNumericInput = useCallback(
       (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (!ALLOWED_KEYS.includes(e.key) && !/[0-9]/.test(e.key)) {
@@ -113,11 +115,11 @@ const ExpenditureField = memo(
           name={`expenditures.${index}.name`}
           render={({ field }) => (
             <FormItem className="flex-1">
-              <FormLabel>Name</FormLabel>
+              <FormLabel>{t("form.expenditureName")}</FormLabel>
               <FormControl>
                 <MemoizedInput
                   type="text"
-                  placeholder="Enter the name of the expenditure"
+                  placeholder={t("form.enterName")}
                   {...field}
                 />
               </FormControl>
@@ -130,14 +132,14 @@ const ExpenditureField = memo(
           name={`expenditures.${index}.amount`}
           render={({ field }) => (
             <FormItem className="flex-1">
-              <FormLabel>Amount</FormLabel>
+              <FormLabel>{t("form.expenditureAmount")}</FormLabel>
               <FormControl>
                 <MemoizedInput
                   type="text"
                   pattern="[0-9]*"
                   inputMode="numeric"
                   onKeyDown={handleNumericInput}
-                  placeholder="Enter the amount"
+                  placeholder={t("form.enterAmount")}
                   value={field.value || ""}
                   onChange={(e) =>
                     field.onChange(
@@ -180,6 +182,7 @@ export function DataForm({
   defaultValues,
   submitLabel = "Submit",
 }: DataFormProps) {
+  const { t } = useTranslation();
   const form = useForm<InputDataType>({
     resolver: zodResolver(formSchema),
     defaultValues: useMemo(
@@ -212,7 +215,9 @@ export function DataForm({
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          form.handleSubmit((d) => onSubmit({ ...d, id: defaultValues?.id }))(e);
+          form.handleSubmit((d) => onSubmit({ ...d, id: defaultValues?.id }))(
+            e
+          );
         }}
         className="space-y-8"
       >
@@ -222,7 +227,7 @@ export function DataForm({
           name="date"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel className="text-primary">Date</FormLabel>
+              <FormLabel className="text-primary">{t("form.date")}</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -236,7 +241,7 @@ export function DataForm({
                       {field.value ? (
                         format(field.value, "PPP")
                       ) : (
-                        <span>Pick a date</span>
+                        <span>{t("form.pickDate")}</span>
                       )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
@@ -267,16 +272,14 @@ export function DataForm({
             name={fieldName as "purchased" | "produced" | "sales"}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  {fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}
-                </FormLabel>
+                <FormLabel>{t(`form.${fieldName}`)}</FormLabel>
                 <FormControl>
                   <MemoizedInput
                     type="text"
                     pattern="[0-9]*"
                     inputMode="numeric"
                     onKeyDown={handleNumericInput}
-                    placeholder={`Enter the amount ${fieldName}`}
+                    placeholder={t("form.enterAmountFor", { field: fieldName })}
                     {...field}
                   />
                 </FormControl>
@@ -289,7 +292,7 @@ export function DataForm({
         {/* Expenditures */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <FormLabel>Expenditures</FormLabel>
+            <FormLabel>{t("form.expenditures")}</FormLabel>
             <Button
               type="button"
               variant="outline"
@@ -298,7 +301,7 @@ export function DataForm({
               onClick={() => append({ name: "", amount: 0 })}
             >
               <Plus className="h-4 w-4" />
-              Add Expenditure
+              {t("form.addExpenditure")}
             </Button>
           </div>
 
@@ -308,6 +311,7 @@ export function DataForm({
               index={index}
               control={form.control}
               remove={remove}
+              t={t}
             />
           ))}
         </div>

@@ -3,9 +3,11 @@ import { Separator } from "@/components/ui/separator";
 import { useCreateProduction } from "@/hooks/production/use-production-data";
 import { ProductionData } from "@/types/api";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 export default function NewData() {
   const createMutation = useCreateProduction();
+  const { t } = useTranslation();
 
   const onSubmit = async (data: InputDataType) => {
     try {
@@ -18,24 +20,24 @@ export default function NewData() {
       } satisfies Omit<ProductionData, "id" | "stock" | "remains">;
 
       await createMutation.mutateAsync(finalData);
-      toast.success("Data submitted successfully!");
+      toast.success(t("newData.success"));
     } catch (error) {
-      toast.error("Failed to submit data");
+      toast.error(t("newData.failed"));
       console.error("Error: ", error);
     }
   };
 
   return (
     <div className="text-primary max-w-xl p-8 mx-auto">
-      <h1 className="text-2xl font-bold mb-4">New Data</h1>
+      <h1 className="text-2xl font-bold mb-4">{t("newData.title")}</h1>
       <p className="text-sm text-muted-foreground mb-8">
-        Please fill in the form below to add new data.
+        {t("newData.subtitle")}
       </p>
       <Separator className="my-8" />
       <DataForm
         onSubmit={onSubmit}
         isSubmitting={createMutation.isPending}
-        submitLabel="Add Data"
+        submitLabel={t("form.addData")}
       />
     </div>
   );

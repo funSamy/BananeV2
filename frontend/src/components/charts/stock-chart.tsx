@@ -7,6 +7,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "../ui/chart";
+import { useTranslation } from "react-i18next";
 
 interface StockChartProps {
   data: {
@@ -23,10 +24,11 @@ const chartConfig: ChartConfig = {
 };
 
 export function StockChart({ data }: StockChartProps) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Stock Level Trends</CardTitle>
+        <CardTitle>{t("dashboard.stockTrends")}</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer className="max-h-[400px] w-full" config={chartConfig}>
