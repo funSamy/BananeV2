@@ -6,11 +6,18 @@ import {
 } from "@/components/charts/expenditure-chart";
 import { OverviewChart } from "@/components/charts/overview-chart";
 import { StockChart } from "@/components/charts/stock-chart";
-import { generateMockData } from "@/data/mocks";
+// import { generateMockData } from "@/data/mocks";
 import { format, subMonths } from "date-fns";
-import { DollarSign, Package, TrendingDown, TrendingUp } from "lucide-react";
+import {
+  DollarSign,
+  Loader2,
+  Package,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
 import { DateRange } from "react-day-picker";
-import { useState, useMemo } from "react";
+import { useState, useMemo, ReactNode } from "react";
+import { useProductionList } from "@/hooks/production/use-production-data";
 
 // Formatter functions
 const compactNumberFormatter = (value: number) => {
@@ -29,7 +36,7 @@ const compactCurrencyFormatter = (value: number) => {
   return formatted;
 };
 
-const TOP_EXPENSES_COUNT = 4;
+const TOP_EXPENSES_COUNT = 5;
 
 export default function Dashboard() {
   const [date, setDate] = useState<DateRange | undefined>({
@@ -37,43 +44,42 @@ export default function Dashboard() {
     to: new Date(),
   });
 
-  // Fetch mock data - replace with actual API call
-  const data = useMemo(() => generateMockData(1200), []);
+  const { data, isLoading, isError } = useProductionList({
+    startDate: date?.from,
+    endDate: date?.to,
+    sortOrder: "desc",
+    pageSize: 500, // Request all data for dashboard aggregation (max allowed by backend)
+  });
 
   // Calculate metrics based on date range
   const metrics = useMemo(() => {
-    let filteredData = data;
-    if (date?.from || date?.to) {
-      filteredData = data.filter((item) => {
-        const itemDate = new Date(item.date);
-        if (date.from && date.to) {
-          return itemDate >= date.from && itemDate <= date.to;
-        } else if (date.from) {
-          return itemDate >= date.from;
-        } else if (date.to) {
-          return itemDate <= date.to;
-        }
-        return true;
-      });
-    }
+    const productionData = data?.data.items;
+    if (!productionData)
+      return {
+        avgStock: 0,
+        revenue: 0,
+        totalExpenses: 0,
+        totalProduced: 0,
+        totalSales: 0,
+      };
 
-    const totalProduced = filteredData.reduce(
+    const totalProduced = productionData.reduce(
       (sum, item) => sum + (item.produced || 0),
       0
     );
-    const totalSales = filteredData.reduce(
+    const totalSales = productionData.reduce(
       (sum, item) => sum + (item.sales || 0),
       0
     );
-    const totalExpenses = filteredData.reduce(
+    const totalExpenses = productionData.reduce(
       (sum, item) =>
-        sum + item.expenditures.reduce((s, e) => s + (e.amount || 0), 0),
+        sum + (item.expenditures?.reduce((s, e) => s + e.amount, 0) || 0),
       0
     );
     const avgStock =
-      filteredData.length > 0
-        ? filteredData.reduce((sum, item) => sum + (item.stock || 0), 0) /
-          filteredData.length
+      productionData.length > 0
+        ? productionData.reduce((sum, item) => sum + item.stock, 0) /
+          productionData.length
         : 0;
 
     return {
@@ -83,79 +89,91 @@ export default function Dashboard() {
       avgStock,
       revenue: totalSales - totalExpenses,
     };
-  }, [data, date]);
+  }, [data?.data.items]);
 
   // Update chart data to respect date range
   const chartData = useMemo(() => {
+    const productionData = data?.data.items;
+    if (!productionData || productionData.length === 0) return [];
+
+    console.log("Processing data - Total items:", productionData.length);
+
+    // Group data by month, keeping track of dates for proper sorting
     const monthlyData = new Map<
       string,
       {
         month: string;
+        sortKey: Date;
         produced: number;
         sales: number;
         stock: number;
         expenses: number;
+        lastDate: Date;
       }
     >();
 
-    // Filter data based on selected date range first
-    const filteredData = data.filter((item) => {
+    productionData.forEach((item) => {
       const itemDate = new Date(item.date);
-      if (date?.from && date?.to) {
-        return itemDate >= date.from && itemDate <= date.to;
-      } else if (date?.from) {
-        return itemDate >= date.from;
-      } else if (date?.to) {
-        return itemDate <= date.to;
+      const monthKey = format(itemDate, "MMM yyyy");
+
+      const existing = monthlyData.get(monthKey);
+
+      if (!existing) {
+        // First entry for this month
+        monthlyData.set(monthKey, {
+          month: monthKey,
+          sortKey: itemDate,
+          produced: item.produced || 0,
+          sales: item.sales || 0,
+          stock: item.stock || 0,
+          expenses:
+            item.expenditures?.reduce((sum, e) => sum + e.amount, 0) || 0,
+          lastDate: itemDate,
+        });
+      } else {
+        // Accumulate produced, sales, and expenses
+        existing.produced += item.produced || 0;
+        existing.sales += item.sales || 0;
+        existing.expenses +=
+          item.expenditures?.reduce((sum, e) => sum + e.amount, 0) || 0;
+
+        // Use the stock value from the most recent date in the month
+        if (itemDate > existing.lastDate) {
+          existing.stock = item.stock || 0;
+          existing.lastDate = itemDate;
+        }
       }
-      return true;
     });
 
-    filteredData.forEach((item) => {
-      const monthKey = format(item.date, "MMM yyyy");
-      const existing = monthlyData.get(monthKey) || {
-        month: monthKey,
-        produced: 0,
-        sales: 0,
-        stock: 0,
-        expenses: 0,
-      };
+    // Convert to array and sort by date
+    const result = Array.from(monthlyData.values())
+      .sort((a, b) => a.sortKey.getTime() - b.sortKey.getTime())
+      .map(({ month, produced, sales, stock, expenses }) => ({
+        month,
+        produced,
+        sales,
+        stock,
+        expenses,
+      }));
 
-      existing.produced += item.produced || 0;
-      existing.sales += item.sales || 0;
-      existing.stock = item.stock || 0;
-      existing.expenses += item.expenditures.reduce(
-        (sum, e) => sum + (e.amount || 0),
-        0
-      );
-
-      monthlyData.set(monthKey, existing);
-    });
-
-    return Array.from(monthlyData.values()).sort(
-      (a, b) => new Date(a.month).getTime() - new Date(b.month).getTime()
+    console.log(
+      "Chart data - Months found:",
+      result.length,
+      result.map((r) => r.month)
     );
-  }, [data, date]);
+    return result;
+  }, [data?.data.items]);
 
   // Update expenditure data preparation
   const expenditureData = useMemo(() => {
     const categories = new Map<string, number>();
 
     // Filter data based on selected date range first
-    const filteredData = data.filter((item) => {
-      const itemDate = new Date(item.date);
-      if (date?.from && date?.to) {
-        return itemDate >= date.from && itemDate <= date.to;
-      } else if (date?.from) {
-        return itemDate >= date.from;
-      } else if (date?.to) {
-        return itemDate <= date.to;
-      }
-      return true;
-    });
+    const productionData = data?.data.items;
+    if (!productionData) return [];
 
-    filteredData.forEach((item) => {
-      item.expenditures.forEach((exp) => {
+    productionData.forEach((item) => {
+      item.expenditures?.forEach((exp) => {
         const existing = categories.get(exp.name) || 0;
         categories.set(exp.name, existing + (exp.amount || 0));
       });
@@ -184,14 +202,24 @@ export default function Dashboard() {
     }
 
     return topExpenses;
-  }, [data, date]);
+  }, [data?.data.items]);
+
+  function LoadingIndicator({ children }: { children: ReactNode }) {
+    return isLoading ? <Loader2 className="animate-spin" /> : children;
+  }
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         <div className="flex items-center space-x-2">
-          <DatePickerWithRange date={date} setDate={setDate} />
+          <LoadingIndicator>
+            <DatePickerWithRange
+              date={date}
+              setDate={setDate}
+              className={isError ? "cursor-not-allowed opacity-60" : ""}
+            />
+          </LoadingIndicator>
         </div>
       </div>
 
@@ -204,15 +232,17 @@ export default function Dashboard() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {compactNumberFormatter(metrics.totalProduced)}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Units produced{" "}
-              {date?.from
-                ? `since ${format(date.from, "MMM d, yyyy")}`
-                : "this period"}
-            </p>
+            <LoadingIndicator>
+              <div className="text-2xl font-bold">
+                {compactNumberFormatter(metrics.totalProduced)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Units produced{" "}
+                {date?.from
+                  ? `since ${format(date.from, "MMM d, yyyy")}`
+                  : "this period"}
+              </p>
+            </LoadingIndicator>
           </CardContent>
         </Card>
 
@@ -222,15 +252,17 @@ export default function Dashboard() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {compactNumberFormatter(metrics.totalSales)}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Units sold{" "}
-              {date?.from
-                ? `since ${format(date.from, "MMM d, yyyy")}`
-                : "this period"}
-            </p>
+            <LoadingIndicator>
+              <div className="text-2xl font-bold">
+                {compactNumberFormatter(metrics.totalSales)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Units sold{" "}
+                {date?.from
+                  ? `since ${format(date.from, "MMM d, yyyy")}`
+                  : "this period"}
+              </p>
+            </LoadingIndicator>
           </CardContent>
         </Card>
 
@@ -242,15 +274,17 @@ export default function Dashboard() {
             <TrendingDown className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {compactCurrencyFormatter(metrics.totalExpenses)}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Total expenditures{" "}
-              {date?.from
-                ? `since ${format(date.from, "MMM d, yyyy")}`
-                : "this period"}
-            </p>
+            <LoadingIndicator>
+              <div className="text-2xl font-bold">
+                {compactCurrencyFormatter(metrics.totalExpenses)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Total expenditures{" "}
+                {date?.from
+                  ? `since ${format(date.from, "MMM d, yyyy")}`
+                  : "this period"}
+              </p>
+            </LoadingIndicator>
           </CardContent>
         </Card>
 
@@ -260,15 +294,17 @@ export default function Dashboard() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {compactCurrencyFormatter(metrics.revenue)}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Net revenue{" "}
-              {date?.from
-                ? `since ${format(date.from, "MMM d, yyyy")}`
-                : "this period"}
-            </p>
+            <LoadingIndicator>
+              <div className="text-2xl font-bold">
+                {compactCurrencyFormatter(metrics.revenue)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Net revenue{" "}
+                {date?.from
+                  ? `since ${format(date.from, "MMM d, yyyy")}`
+                  : "this period"}
+              </p>
+            </LoadingIndicator>
           </CardContent>
         </Card>
       </div>

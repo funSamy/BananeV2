@@ -19,6 +19,6 @@ export function setCookie(name: string, value: string) {
   return Cookies.set(name, value, cookieOptions);
 }
 
-export function removeCookie(name: string) {
-  return Cookies.remove(name, cookieOptions);
+export function removeCookies(...names: string[]) {
+  for (const name in names) Cookies.remove(name, cookieOptions);
 }

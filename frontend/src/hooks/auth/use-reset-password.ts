@@ -1,15 +1,21 @@
 import { useMutation } from "@tanstack/react-query";
-import authApi, { ResetPasswordRequest, ApiResponse } from "@/lib/api/auth";
-import { useNavigate } from "react-router-dom";
+import {
+  ResetPasswordRequest,
+  ApiError,
+  ApiSuccess,
+} from "@/lib/api";
+import { toast } from "sonner";
+import authApi from "@/lib/api/auth";
 
 export function useResetPassword() {
-  const navigate = useNavigate();
-
-  return useMutation<ApiResponse, Error, ResetPasswordRequest>({
+  return useMutation<ApiSuccess, ApiError, ResetPasswordRequest>({
     mutationFn: (data) => authApi.resetPassword(data),
     onSuccess: () => {
-      // Redirect to login page after successful password reset
-      navigate("/login");
+      toast.success("Password updated successfully");
     },
+    onError: (error) =>
+      toast.error("An error occured", {
+        description: error.message || error.error.message,
+      }),
   });
 }

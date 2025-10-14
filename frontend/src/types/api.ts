@@ -26,10 +26,17 @@ export interface ExpenditureItem {
   amount: number;
 }
 
+export type SortBy =
+  | "date"
+  | "produced"
+  | "purchased"
+  | "sales"
+  | "stock"
+  | "remains";
 export interface PaginationParams {
   page?: number;
   pageSize?: number;
-  sortBy?: string;
+  sortBy?: SortBy;
   sortOrder?: "asc" | "desc";
 }
 
@@ -81,19 +88,4 @@ export interface ExpenditureBreakdown {
   name: string;
   value: number;
   percentage: number;
-}
-
-export interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message?: string;
-}
-
-export interface ApiError {
-  success: false;
-  error: {
-    code: string;
-    message: string;
-    details?: unknown;
-  };
 }

@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn, getCookie } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -19,7 +19,7 @@ import {
 } from "../ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { Eye, EyeOff, Loader } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useLogin } from "@/hooks/auth/use-login";
@@ -72,6 +72,10 @@ export default function LoginForm({
       console.error(error);
     }
   };
+
+  useLayoutEffect(() => {
+    if (getCookie("token")) navigate("/dashboard", { replace: true });
+  }, [navigate]);
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>

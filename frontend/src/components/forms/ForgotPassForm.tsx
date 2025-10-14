@@ -18,21 +18,24 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useForgotPassword } from "@/hooks/auth/use-forgot-password";
+import { useResetPassword } from "@/hooks/auth/use-reset-password";
+import { useNavigate } from "react-router-dom";
 
 const formSchema = z
   .object({
     password: z
       .string()
       .trim()
-      .min(4, { message: "Password must be at least 4 characters" })
+      .min(6, { message: "Password must be at least 6 characters" })
       .max(20, { message: "Password must be at most 20 characters" }),
     confirmPassword: z
       .string()
       .trim()
-      .min(4, { message: "Password must be at least 4 characters" })
+      .min(6, { message: "Password must be at least 6 characters" })
       .max(20, { message: "Password must be at most 20 characters" }),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -48,6 +51,11 @@ export default function ForgotPassForm({
 }: React.ComponentPropsWithoutRef<"div">) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordToken, setPasswordToken] = useState<string | null>(null);
+
+  const forgotPass = useForgotPassword();
+  const resetPass = useResetPassword();
+  const navigate = useNavigate();
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -57,8 +65,34 @@ export default function ForgotPassForm({
     },
   });
 
-  function onSubmit(values: FormSchema) {
-    console.log(values);
+  useEffect(() => {
+    const resp = async () =>
+      await forgotPass.mutateAsync({
+        email: "admin@admin.com",
+      });
+    resp()
+      .then((res) => {
+        if (res.data?.token) return setPasswordToken(res.data.token);
+        else return setPasswordToken(null);
+      })
+      .catch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function onSubmit(values: FormSchema) {
+    if (passwordToken === null) return;
+    if (values.confirmPassword !== values.password) {
+      return;
+    }
+    await resetPass
+      .mutateAsync({
+        newPassword: values.password,
+        token: passwordToken,
+      })
+      .then(() => navigate("/login"));
+      // .catch((error) =>
+      //   toast.error("An error occured", { description: error.message })
+      // );
   }
 
   return (

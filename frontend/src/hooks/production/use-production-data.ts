@@ -9,14 +9,14 @@ import {
 const PRODUCTION_KEYS = {
   all: ["production"] as const,
   lists: () => [...PRODUCTION_KEYS.all, "list"] as const,
-  list: (params: PaginationParams & { filters?: ProductionFilters }) =>
+  list: (params: PaginationParams & ProductionFilters) =>
     [...PRODUCTION_KEYS.lists(), params] as const,
   details: () => [...PRODUCTION_KEYS.all, "detail"] as const,
   detail: (id: number) => [...PRODUCTION_KEYS.details(), id] as const,
 };
 
 export function useProductionList(
-  params: PaginationParams & { filters?: ProductionFilters }
+  params: PaginationParams & ProductionFilters
 ) {
   return useQuery({
     queryKey: PRODUCTION_KEYS.list(params),

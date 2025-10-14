@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getCookie, removeCookie } from "../utils";
+import { getCookie, removeCookies } from "../utils";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -37,8 +37,7 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
 
       // Clear auth data
-      removeCookie("token");
-      removeCookie("user");
+      removeCookies("token", "user");
 
       // Get current location
       const currentPath = window.location.pathname;

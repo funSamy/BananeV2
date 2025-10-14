@@ -1,11 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
-import authApi, { LoginRequest, LoginResponse } from "@/lib/api/auth";
+import { ApiError, LoginRequest, LoginResponse } from "@/lib/api";
 import { setCookie } from "@/lib/utils";
 import { toast } from "sonner";
+import authApi from "@/lib/api/auth";
 
 export function useLogin() {
 
-  return useMutation<LoginResponse, Error, LoginRequest>({
+  return useMutation<LoginResponse, ApiError, LoginRequest>({
     mutationFn: (data) => authApi.login(data),
     onSuccess: (response) => {
       // Store token in localStorage

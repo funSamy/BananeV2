@@ -29,7 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { columns } from "./columns";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Loader2, AlertCircle } from "lucide-react";
 import { DatePickerWithRange } from "@/components/ui/date-range-picker";
 import type { DateRange } from "react-day-picker";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
@@ -69,11 +69,11 @@ export default function DataTablePage() {
   };
 
   // Fetch data using the hook
-  const { data: tableData, isLoading } = useProductionTable(
-    pagination,
-    sorting,
-    date
-  );
+  const {
+    data: tableData,
+    isLoading,
+    isError,
+  } = useProductionTable(pagination, sorting, date);
 
   // Update mutation
   const updateMutation = useUpdateProduction();
@@ -87,14 +87,16 @@ export default function DataTablePage() {
       try {
         const { id, ...rest } = data as DataEntry;
 
-        await updateMutation.mutateAsync({
+        const res = await updateMutation.mutateAsync({
           id,
           data: {
             ...rest,
             date: rest.date.toISOString(),
           },
         });
-        toast.success("Data updated successfully!");
+        toast.success("Data updated successfully!", {
+          description: res.message,
+        });
         setEditingRow(null);
       } catch (error) {
         console.error(error);
@@ -227,9 +229,9 @@ export default function DataTablePage() {
                         {header.isPlaceholder
                           ? null
                           : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
                       </TableHead>
                     );
                   })}
@@ -241,9 +243,19 @@ export default function DataTablePage() {
                 <TableRow>
                   <TableCell
                     colSpan={columns.length}
+                    className="h-24 w-full justify-center text-primary"
+                  >
+                    <Loader2 className="animate-spin " />
+                  </TableCell>
+                </TableRow>
+              ) : isError ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
                     className="h-24 text-center text-primary"
                   >
-                    Loading...
+                    <AlertCircle className="fill-red-500" />
+                    Failed to load data.
                   </TableCell>
                 </TableRow>
               ) : table.getRowModel().rows?.length ? (

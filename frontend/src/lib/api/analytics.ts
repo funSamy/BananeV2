@@ -1,10 +1,10 @@
 import {
   AnalyticsOverview,
-  ApiResponse,
   ExpenditureBreakdown,
   MonthlyTrend,
 } from "@/types/api";
 import axiosInstance from "./axios";
+import { ApiResponse } from "./types";
 
 interface DateRangeParams {
   startDate?: Date;

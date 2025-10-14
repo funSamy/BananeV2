@@ -62,4 +62,5 @@ const protectedRoutes: RouteObject[] = [
   },
 ];
 
+// eslint-disable-next-line react-refresh/only-export-components
 export default createBrowserRouter([...publicRoutes, ...protectedRoutes]);
