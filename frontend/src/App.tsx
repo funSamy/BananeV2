@@ -3,6 +3,8 @@ import router from "./router";
 import { ThemeProvider } from "./components/theme/theme-provider";
 import { Toaster } from "sonner";
 import { QueryProvider } from "./providers/query-client";
+import { PWAUpdatePrompt } from "./components/pwa/pwa-update-prompt";
+import { PWAInstallPrompt } from "./components/pwa/pwa-install-prompt";
 
 export default function App() {
   return (
@@ -16,6 +18,8 @@ export default function App() {
               unstyled: false,
             }}
           />
+          <PWAUpdatePrompt />
+          <PWAInstallPrompt />
         </div>
       </ThemeProvider>
     </QueryProvider>

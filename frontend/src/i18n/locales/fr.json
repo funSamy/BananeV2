@@ -132,5 +132,15 @@
     "goToPreviousPage": "Aller à la page précédente",
     "goToNextPage": "Aller à la page suivante",
     "goToLastPage": "Aller à la dernière page"
+  },
+  "pwa": {
+    "appReady": "Application prête à fonctionner hors ligne",
+    "offlineDescription": "L'application est maintenant prête à fonctionner hors ligne.",
+    "updateAvailable": "Nouvelle mise à jour disponible",
+    "updateDescription": "Une nouvelle version de l'application est disponible. Cliquez sur recharger pour mettre à jour.",
+    "reload": "Recharger",
+    "close": "Fermer",
+    "install": "Installer l'application",
+    "installPrompt": "Installez cette application sur votre appareil pour une meilleure expérience"
   }
 }

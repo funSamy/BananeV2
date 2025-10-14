@@ -132,5 +132,15 @@
     "goToPreviousPage": "Go to previous page",
     "goToNextPage": "Go to next page",
     "goToLastPage": "Go to last page"
+  },
+  "pwa": {
+    "appReady": "App Ready to Work Offline",
+    "offlineDescription": "The app is now ready to work offline.",
+    "updateAvailable": "New Update Available",
+    "updateDescription": "A new version of the app is available. Click reload to update.",
+    "reload": "Reload",
+    "close": "Close",
+    "install": "Install App",
+    "installPrompt": "Install this app on your device for a better experience"
   }
 }
