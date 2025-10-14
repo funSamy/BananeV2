@@ -5,13 +5,26 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductionDto } from './dto/create-production.dto';
-import { ProductionQueryDto, SortOrder } from './dto/production-query.dto';
+import {
+  ProductionQueryDto,
+  SortOrder,
+  SortByField,
+} from './dto/production-query.dto';
 import { Prisma } from '@prisma/client';
 import { UpdateProductionDto } from './dto/update-production.dto';
 
 @Injectable()
 export class ProductionService {
   constructor(private prisma: PrismaService) {}
+
+  private expenditureInclude: Prisma.ProductionDataInclude = {
+    expenditures: {
+      select: {
+        name: true,
+        amount: true,
+      },
+    },
+  };
 
   async create(createProductionDto: CreateProductionDto) {
     const { expenditures, ...productionData } = createProductionDto;
@@ -29,7 +42,19 @@ export class ProductionService {
       );
     }
 
-    const stock = productionData.produced;
+    // Retrieve the last stored data to calculate stock and remains
+    // If no previous data, assume stock starts at produced amount
+
+    const last = await this.prisma.productionData.findFirst({
+      orderBy: {
+        date: 'desc',
+      },
+      select: {
+        remains: true,
+      },
+    });
+
+    const stock = productionData.produced + (last?.remains || 0);
     const remains =
       stock - productionData.sales > 0 ? stock - productionData.sales : 0;
     const data = await this.prisma.productionData.create({
@@ -41,9 +66,7 @@ export class ProductionService {
           create: expenditures,
         },
       },
-      include: {
-        expenditures: true,
-      },
+      include: this.expenditureInclude,
     });
 
     return {
@@ -56,7 +79,7 @@ export class ProductionService {
     const {
       page = 1,
       pageSize = 20,
-      sortBy = 'date',
+      sortBy = SortByField.DATE,
       sortOrder = SortOrder.DESC,
       startDate,
       endDate,
@@ -93,11 +116,9 @@ export class ProductionService {
         skip: (page - 1) * pageSize,
         take: pageSize,
         orderBy: {
-          [sortBy]: sortOrder.toLowerCase(),
+          [sortBy]: sortOrder.valueOf().toLowerCase(),
         },
-        include: {
-          expenditures: true,
-        },
+        include: this.expenditureInclude,
       }),
     ]);
 
@@ -121,9 +142,7 @@ export class ProductionService {
   async findOne(id: number) {
     const production = await this.prisma.productionData.findUnique({
       where: { id },
-      include: {
-        expenditures: true,
-      },
+      include: this.expenditureInclude,
     });
 
     if (!production) {
@@ -139,12 +158,12 @@ export class ProductionService {
     const { expenditures, ...productionData } = updateData;
 
     // First check if record exists
-    const existing = await this.findOne(id);
+    const { data } = await this.findOne(id);
 
     // Calculate new values using existing data
-    const newProduced = productionData.produced ?? existing.data.produced;
-    const newSales = productionData.sales ?? existing.data.sales;
-    const newPurchased = productionData.purchased ?? existing.data.purchased;
+    const newProduced = productionData.produced ?? data.produced;
+    const newSales = productionData.sales ?? data.sales;
+    const newPurchased = productionData.purchased ?? data.purchased;
 
     // Handle expenditures update
     const expendituresUpdate = expenditures
@@ -180,9 +199,7 @@ export class ProductionService {
         stock: newPurchased + newProduced - newSales,
         expenditures: expendituresUpdate,
       },
-      include: {
-        expenditures: true,
-      },
+      include: this.expenditureInclude,
     });
   }
 
@@ -192,6 +209,7 @@ export class ProductionService {
 
     await this.prisma.productionData.delete({
       where: { id },
+      include: this.expenditureInclude,
     });
 
     return {

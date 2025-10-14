@@ -24,6 +24,11 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: loginDto.email },
+      select: {
+        id: true,
+        email: true,
+        password: true,
+      },
     });
 
     if (!user) {
@@ -56,6 +61,9 @@ export class AuthService {
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: forgotPasswordDto.email },
+      select: {
+        id: true,
+      },
     });
 
     if (!user) {
@@ -64,7 +72,7 @@ export class AuthService {
 
     const token = randomBytes(32).toString('hex');
     const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 1); // Token expires in 1 hour
+    expiresAt.setHours(expiresAt.getMinutes() + 10); // Token expires in 10 minutes
 
     await this.prisma.user.update({
       where: { id: user.id },
@@ -80,6 +88,8 @@ export class AuthService {
     return {
       success: true,
       message: 'Password reset instructions sent to email',
+      // TODO: Remove this in Prod
+      data: { token },
     };
   }
 

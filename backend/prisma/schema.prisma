@@ -19,6 +19,8 @@ model User {
     otpVerified        Boolean   @default(false)
     createdAt          DateTime  @default(now())
     updatedAt          DateTime  @updatedAt
+
+    @@map("users")
 }
 
 model ProductionData {
@@ -34,6 +36,7 @@ model ProductionData {
     updatedAt    DateTime      @updatedAt
 
     @@index([date])
+    @@map("production_data")
 }
 
 model Expenditure {
@@ -46,4 +49,5 @@ model Expenditure {
     updatedAt      DateTime       @updatedAt
 
     @@index([productionId])
+    @@map("expenditures")
 }

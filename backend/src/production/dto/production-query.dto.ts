@@ -1,16 +1,18 @@
-import {
-  IsOptional,
-  IsDateString,
-  IsEnum,
-  IsInt,
-  Min,
-  Max,
-} from 'class-validator';
+import { IsOptional, IsEnum, IsInt, Min, Max } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export enum SortOrder {
   ASC = 'asc',
   DESC = 'desc',
+}
+
+export enum SortByField {
+  DATE = 'date',
+  PURCHASED = 'purchased',
+  PRODUCED = 'produced',
+  STOCK = 'stock',
+  SALES = 'sales',
+  REMAINS = 'remains',
 }
 
 export class ProductionQueryDto {
@@ -30,11 +32,14 @@ export class ProductionQueryDto {
   @IsOptional()
   @IsInt()
   @Min(10)
-  @Max(100)
+  @Max(500)
   pageSize?: number = 20;
 
   @IsOptional()
-  sortBy?: string;
+  @IsEnum(SortByField, {
+    message: `sortBy must be one of: ${Object.values(SortByField).join(', ')}`,
+  })
+  sortBy?: SortByField;
 
   @IsOptional()
   @IsEnum(SortOrder)
