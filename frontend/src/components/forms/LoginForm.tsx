@@ -26,16 +26,7 @@ import { useLogin } from "@/hooks/auth/use-login";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 
-const formSchema = z.object({
-  email: z.string().email({ message: "Invalid email address" }),
-  password: z
-    .string()
-    .trim()
-    .min(6, { message: "Password must be at least 6 characters" })
-    .max(20, { message: "Password must be at most 20 characters" }),
-});
-
-type FormSchema = z.infer<typeof formSchema>;
+// type FormSchema = z.infer<typeof formSchema>;
 
 export default function LoginForm({
   className,
@@ -47,7 +38,16 @@ export default function LoginForm({
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
 
-  const form = useForm<FormSchema>({
+  const formSchema = z.object({
+    email: z.string().email({ message: t("validation.invalidEmail") }),
+    password: z
+      .string()
+      .trim()
+      .min(6, { message: t("validation.passwordMin") })
+      .max(20, { message: t("validation.passwordMax") }),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "admin@admin.com",
@@ -55,7 +55,7 @@ export default function LoginForm({
     },
   });
 
-  const onSubmit = async (values: FormSchema) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       const response = await login.mutateAsync(values);
       console.log({ response });

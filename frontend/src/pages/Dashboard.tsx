@@ -222,6 +222,7 @@ export default function Dashboard() {
               date={date}
               setDate={setDate}
               className={isError ? "cursor-not-allowed opacity-60" : ""}
+              text={t("dashboard.pickDateRange")}
             />
           </LoadingIndicator>
         </div>

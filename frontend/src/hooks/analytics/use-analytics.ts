@@ -6,21 +6,26 @@ interface DateRangeParams {
   endDate?: Date;
 }
 
+interface ExpenditureBreakdownParams extends DateRangeParams {
+  limit?: number;
+}
+
 const ANALYTICS_KEYS = {
   all: ["analytics"] as const,
   overview: (params?: DateRangeParams) =>
     [...ANALYTICS_KEYS.all, "overview", params] as const,
   monthlyTrends: (params?: DateRangeParams) =>
     [...ANALYTICS_KEYS.all, "monthly-trends", params] as const,
-  expenditureBreakdown: (params?: DateRangeParams & { limit?: number }) =>
+  expenditureBreakdown: (params?: ExpenditureBreakdownParams) =>
     [...ANALYTICS_KEYS.all, "expenditure-breakdown", params] as const,
 };
 
+const staleTime: Readonly<number> = 5 * 60 * 1000; // 5 minutes cache
 export function useAnalyticsOverview(params?: DateRangeParams) {
   return useQuery({
     queryKey: ANALYTICS_KEYS.overview(params),
     queryFn: () => analyticsApi.getOverview(params),
-    staleTime: 5 * 60 * 1000, // 5 minutes cache
+    staleTime,
   });
 }
 
@@ -28,16 +33,14 @@ export function useMonthlyTrends(params?: DateRangeParams) {
   return useQuery({
     queryKey: ANALYTICS_KEYS.monthlyTrends(params),
     queryFn: () => analyticsApi.getMonthlyTrends(params),
-    staleTime: 5 * 60 * 1000, // 5 minutes cache
+    staleTime,
   });
 }
 
-export function useExpenditureBreakdown(
-  params?: DateRangeParams & { limit?: number }
-) {
+export function useExpenditureBreakdown(params?: ExpenditureBreakdownParams) {
   return useQuery({
     queryKey: ANALYTICS_KEYS.expenditureBreakdown(params),
     queryFn: () => analyticsApi.getExpenditureBreakdown(params),
-    staleTime: 5 * 60 * 1000, // 5 minutes cache
+    staleTime,
   });
 }

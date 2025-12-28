@@ -26,25 +26,7 @@ import { useResetPassword } from "@/hooks/auth/use-reset-password";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-const formSchema = z
-  .object({
-    password: z
-      .string()
-      .trim()
-      .min(6, { message: "Password must be at least 6 characters" })
-      .max(20, { message: "Password must be at most 20 characters" }),
-    confirmPassword: z
-      .string()
-      .trim()
-      .min(6, { message: "Password must be at least 6 characters" })
-      .max(20, { message: "Password must be at most 20 characters" }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
-
-type FormSchema = z.infer<typeof formSchema>;
+// type FormSchema = z.infer<typeof formSchema>;
 
 export default function ForgotPassForm({
   className,
@@ -59,7 +41,23 @@ export default function ForgotPassForm({
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const form = useForm<FormSchema>({
+  const formSchema = z
+    .object({
+      password: z
+        .string()
+        .trim()
+        .min(6, { message: t("validation.passwordMin") }),
+      confirmPassword: z
+        .string()
+        .trim()
+        .max(20, { message: t("validation.passwordMax") }),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t("validation.passwordMismatch"),
+      path: ["confirmPassword"],
+    });
+
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       password: "",
@@ -81,7 +79,7 @@ export default function ForgotPassForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function onSubmit(values: FormSchema) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     if (passwordToken === null) return;
     if (values.confirmPassword !== values.password) {
       return;

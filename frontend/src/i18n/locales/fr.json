@@ -22,6 +22,10 @@
     "openSidebar": "Ouvrir la barre latérale",
     "switchLanguage": "Changer de langue"
   },
+  "404": {
+    "title": "La page que vous cherchez n'a pas été trouver",
+    "btn": "Retourner à la page d'acceuil"
+  },
   "auth": {
     "login": "Connexion",
     "logout": "Déconnexion",
@@ -60,6 +64,7 @@
     "dataTable": "Tableau de données"
   },
   "dashboard": {
+    "pickDateRange": "Choisisez une ranger de date",
     "title": "Tableau de bord",
     "totalProduction": "Production totale",
     "totalSales": "Ventes totales",

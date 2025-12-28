@@ -190,7 +190,11 @@ export default function DataTablePage() {
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <DatePickerWithRange date={date} setDate={setDate} />
+              <DatePickerWithRange
+                date={date}
+                setDate={setDate}
+                text={t("dashboard.pickDateRange")}
+              />
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

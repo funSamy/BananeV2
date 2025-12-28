@@ -22,6 +22,10 @@
     "openSidebar": "Open sidebar",
     "switchLanguage": "Switch language"
   },
+  "404": {
+    "title": "The page your are looking for was not found",
+    "btn": "Return to home page"
+  },
   "auth": {
     "login": "Login",
     "logout": "Logout",
@@ -60,6 +64,7 @@
     "dataTable": "Data Table"
   },
   "dashboard": {
+    "pickDateRange": "Pick a date range",
     "title": "Dashboard",
     "totalProduction": "Total Production",
     "totalSales": "Total Sales",

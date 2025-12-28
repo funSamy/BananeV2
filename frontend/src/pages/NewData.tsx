@@ -12,7 +12,7 @@ export default function NewData() {
   const onSubmit = async (data: InputDataType) => {
     try {
       const finalData = {
-        date: new Date(data.date).toISOString().split("T")[0],
+        date: new Date(data.date).toISOString(),
         purchased: data.purchased,
         produced: data.produced,
         sales: data.sales,
