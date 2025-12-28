@@ -1,12 +1,15 @@
 import {
-  IsDate,
   IsInt,
   IsOptional,
   Min,
   ValidateNested,
   IsString,
+  IsNotEmpty,
+  MaxDate,
+  MinDate,
+  IsDate,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 class ExpenditureDto {
   @IsInt()
@@ -18,8 +21,18 @@ class ExpenditureDto {
 }
 
 export class CreateProductionDto {
+  @IsNotEmpty()
+  @Type(() => Date) // Convert input string to JS Date object
   @IsDate()
-  @Type(() => Date)
+  @MinDate(new Date('2016-01-01')) // Example minimum date
+  @MaxDate(new Date()) // Cannot be in the future
+  @Transform(({ value }) => {
+    if (!(value instanceof Date)) return value;
+    // Normalize to Midnight UTC (or your preferred timezone)
+    return new Date(
+      Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()),
+    );
+  })
   date: Date;
 
   @IsInt()

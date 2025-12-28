@@ -12,5 +12,5 @@ export class UpdateProductionDto extends CreateProductionDto {
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => UpdateExpenditureDto)
-  expenditures?: UpdateExpenditureDto[];
+  declare expenditures?: UpdateExpenditureDto[];
 }

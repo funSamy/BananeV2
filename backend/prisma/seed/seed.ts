@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { ProdSeedData } from './proData';
+// import { ProdSeedData } from './proData';
 
 async function main() {
   const prisma = new PrismaClient({
@@ -10,7 +10,7 @@ async function main() {
       timeout: 300_000, // Set a timeout for transactions
     },
   });
-  const prodData = new ProdSeedData(prisma);
+  // const prodData = new ProdSeedData(prisma);
 
   // Clear existing data
   console.log('Clearing existing production data...');
@@ -20,9 +20,9 @@ async function main() {
   console.timeEnd('Clearing existing data');
   console.log('Existing data cleared.');
 
-  console.time('Production data seeding');
-  await prodData.create(3_000);
-  console.timeEnd('Production data seeding');
+  // console.time('Production data seeding');
+  // await prodData.create(3_000);
+  // console.timeEnd('Production data seeding');
   console.log('Production data seeded successfully');
 
   await prisma.$disconnect();

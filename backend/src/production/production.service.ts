@@ -10,7 +10,7 @@ import {
   SortOrder,
   SortByField,
 } from './dto/production-query.dto';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../../prisma/generated/prisma/client';
 import { UpdateProductionDto } from './dto/update-production.dto';
 
 @Injectable()
@@ -29,16 +29,19 @@ export class ProductionService {
   async create(createProductionDto: CreateProductionDto) {
     const { expenditures, ...productionData } = createProductionDto;
 
+    // Convert date string to Date object
+    const dateObj = new Date(productionData.date);
+
     // Check if record with the same date exists
     const existingData = await this.prisma.productionData.findUnique({
       where: {
-        date: productionData.date,
+        date: dateObj.toISOString().split('T')[0],
       },
     });
 
     if (existingData) {
       throw new ConflictException(
-        `Data for ${productionData.date.toUTCString()} already exists`,
+        `Data for ${dateObj.toISOString()} already exists`,
       );
     }
 
@@ -60,6 +63,7 @@ export class ProductionService {
     const data = await this.prisma.productionData.create({
       data: {
         ...productionData,
+        date: dateObj,
         remains,
         stock,
         expenditures: {
@@ -155,10 +159,13 @@ export class ProductionService {
   }
 
   async update(id: number, updateData: Partial<UpdateProductionDto>) {
-    const { expenditures, ...productionData } = updateData;
+    const { expenditures, date, ...productionData } = updateData;
 
     // First check if record exists
     const { data } = await this.findOne(id);
+
+    // Convert date string to Date object if provided
+    const dateObj = date ? new Date(date) : undefined;
 
     // Calculate new values using existing data
     const newProduced = productionData.produced ?? data.produced;
@@ -195,6 +202,7 @@ export class ProductionService {
       where: { id },
       data: {
         ...productionData,
+        ...(dateObj && { date: dateObj }),
         remains: newProduced - newSales,
         stock: newPurchased + newProduced - newSales,
         expenditures: expendituresUpdate,
