@@ -75,7 +75,7 @@ Your BananeV2 application has been successfully integrated into a **single-serve
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────┐
-│              NestJS Server (Port 5000)                   │
+│              NestJS Server (Port 1965)                   │
 ├─────────────────────────────────────────────────────────┤
 │                                                          │
 │  Request: /api/v1/*                                     │
@@ -109,17 +109,17 @@ Your BananeV2 application has been successfully integrated into a **single-serve
 ### Request Routing
 
 1. **API Requests** (`/api/v1/*`)
-   - Example: `GET http://localhost:5000/api/v1/users`
+   - Example: `GET http://localhost:1965/api/v1/users`
    - Handled by: Backend controllers
    - Response: JSON data
 
 2. **Frontend Routes** (`/`, `/dashboard`, etc.)
-   - Example: `GET http://localhost:5000/dashboard`
+   - Example: `GET http://localhost:1965/dashboard`
    - Handled by: Static file server
    - Response: `index.html` → React Router takes over
 
 3. **Static Assets** (`/assets/*`)
-   - Example: `GET http://localhost:5000/assets/images/logo.png`
+   - Example: `GET http://localhost:1965/assets/images/logo.png`
    - Handled by: Static file server
    - Response: Asset file
 
@@ -130,7 +130,7 @@ Your BananeV2 application has been successfully integrated into a **single-serve
 ```
 Developer → Edit Code → Hot Reload
   │
-  ├─→ Backend: yarn start:dev (Port 5000)
+  ├─→ Backend: yarn start:dev (Port 1965)
   └─→ Frontend: yarn dev (Port 3000)
 ```
 
@@ -139,7 +139,7 @@ Developer → Edit Code → Hot Reload
 ```
 Developer → Build (yarn build:full) → Deploy
   │
-  └─→ Windows Service → Single Server (Port 5000)
+  └─→ Windows Service → Single Server (Port 1965)
         │
         ├─→ Serves API (/api/v1/*)
         └─→ Serves Frontend (/)
@@ -256,7 +256,7 @@ Before deploying to production:
 - [ ] Run `.\validate-setup.ps1` - All checks pass
 - [ ] Build succeeds: `yarn build:full`
 - [ ] Test locally: `yarn start:prod` works
-- [ ] Frontend loads: `http://localhost:5000`
+- [ ] Frontend loads: `http://localhost:1965`
 - [ ] Login works
 - [ ] API calls successful (check Network tab)
 - [ ] PWA installable
@@ -272,7 +272,7 @@ If you encounter issues:
 2. **Check logs**:
    - Service logs: `C:\ProgramData\BananeV2 Production Manager\daemon\`
    - Application logs: Backend console output
-3. **Verify ports**: `netstat -ano | findstr :5000`
+3. **Verify ports**: `netstat -ano | findstr :1965`
 4. **Check service**: `services.msc` → Look for "BananeV2 Production Manager"
 5. **Review docs**:
    - `QUICK_START.md` - Quick reference
@@ -289,7 +289,7 @@ If you encounter issues:
    yarn start:prod
    ```
 
-   Open `http://localhost:5000` and verify everything works
+   Open `http://localhost:1965` and verify everything works
 
 2. **Install as service** (as Administrator):
 
@@ -312,7 +312,7 @@ If you encounter issues:
 ## Success Indicators
 
 ✅ Service shows as "Running" in Windows Services
-✅ Application accessible at `http://localhost:5000`
+✅ Application accessible at `http://localhost:1965`
 ✅ Frontend loads without errors
 ✅ Login/authentication works
 ✅ API calls succeed

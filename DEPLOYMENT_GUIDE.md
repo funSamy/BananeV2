@@ -6,7 +6,7 @@ This guide explains how to deploy BananeV2 as a single integrated application wi
 
 The application is now configured as a **single-server architecture**:
 
-- **Backend (NestJS)**: Runs on port 5000 (configurable)
+- **Backend (NestJS)**: Runs on port 1965 (configurable)
 - **Frontend (React/Vite)**: Built as static files and served by the backend
 - **API Routes**: All API endpoints are under `/api/v1/*`
 - **Frontend Routes**: Everything else (`/`, `/login`, `/dashboard`, etc.) serves the React app
@@ -14,7 +14,7 @@ The application is now configured as a **single-server architecture**:
 ```
 ┌─────────────────────────────────────────┐
 │         BananeV2 Application            │
-│  (Single Node.js Process on Port 5000) │
+│  (Single Node.js Process on Port 1965) │
 ├─────────────────────────────────────────┤
 │                                         │
 │  ┌───────────────────────────────────┐ │
@@ -90,8 +90,8 @@ yarn start:prod
 
 Then open your browser and navigate to:
 
-- **Application**: <http://localhost:5000>
-- **API Health Check**: <http://localhost:5000/api/v1/auth/health> (if you have a health endpoint)
+- **Application**: <http://localhost:1965>
+- **API Health Check**: <http://localhost:1965/api/v1/auth/health> (if you have a health endpoint)
 
 You should see the React frontend loading. The PWA should also be installable.
 
@@ -146,7 +146,7 @@ yarn service:uninstall
 
 ### Port Configuration
 
-By default, the service runs on port 5000. To change:
+By default, the service runs on port 1965. To change:
 
 1. Create or edit `backend/.env`:
 
@@ -176,7 +176,7 @@ DATABASE_URL="postgresql://user:password@localhost:5432/banane"  # For PostgreSQ
 
 Once the service is running:
 
-1. **Open Application**: Navigate to `http://localhost:5000` in your browser
+1. **Open Application**: Navigate to `http://localhost:1965` in your browser
 2. **Install PWA**:
    - Click the install button in your browser's address bar
    - Or use the install prompt in the app
@@ -226,7 +226,7 @@ Common issues:
 1. Check API is responding:
 
    ```powershell
-   curl http://localhost:5000/api/v1/auth/login -v
+   curl http://localhost:1965/api/v1/auth/login -v
    ```
 
 2. Verify CORS configuration in `backend/src/main.ts`
@@ -302,7 +302,7 @@ yarn service:uninstall
 For production, use IIS or nginx as a reverse proxy:
 
 ```
-[Browser] --HTTPS--> [IIS/nginx:443] --HTTP--> [Node.js:5000]
+[Browser] --HTTPS--> [IIS/nginx:443] --HTTP--> [Node.js:1965]
 ```
 
 ## Performance Tips

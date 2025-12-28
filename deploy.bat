@@ -135,7 +135,7 @@ cd /d "%BACKEND_PATH%"
 call yarn service:start
 timeout /t 3 /nobreak >nul
 echo.
-echo Application should be available at: http://localhost:5000
+echo Application should be available at: http://localhost:1965
 cd /d "%ROOT_PATH%"
 goto END_SECTION
 
@@ -158,7 +158,7 @@ cd /d "%BACKEND_PATH%"
 call yarn service:restart
 timeout /t 3 /nobreak >nul
 echo.
-echo Application should be available at: http://localhost:5000
+echo Application should be available at: http://localhost:1965
 cd /d "%ROOT_PATH%"
 goto END_SECTION
 

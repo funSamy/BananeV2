@@ -5,7 +5,7 @@
 Your BananeV2 application is now configured as a **single integrated server** where:
 
 ✅ Backend serves both API and frontend static files
-✅ Everything runs on **one port** (5000 by default)
+✅ Everything runs on **one port** (1965 by default)
 ✅ Can be installed as a **Windows Service** for auto-startup
 ✅ PWA works seamlessly with the integrated setup
 
@@ -14,10 +14,10 @@ Your BananeV2 application is now configured as a **single integrated server** wh
 ```
 Before (2 servers):
 - Frontend: http://localhost:3000
-- Backend:  http://localhost:5000/api/v1
+- Backend:  http://localhost:1965/api/v1
 
 After (1 server):
-- Everything: http://localhost:5000
+- Everything: http://localhost:1965
   ├── /              → Frontend (React app)
   ├── /dashboard     → Frontend routes
   ├── /login         → Frontend routes
@@ -45,7 +45,7 @@ yarn dev
 ```
 
 - Frontend: <http://localhost:3000>
-- Backend: <http://localhost:5000>
+- Backend: <http://localhost:1965>
 
 ### 🏗️ Production Build
 
@@ -65,7 +65,7 @@ cd backend
 yarn start:prod
 ```
 
-Then open: <http://localhost:5000>
+Then open: <http://localhost:1965>
 
 ### 🔧 Windows Service (Production)
 
@@ -128,7 +128,7 @@ yarn start:prod
 
 ### 3. Verify in Browser
 
-Navigate to <http://localhost:5000>:
+Navigate to <http://localhost:1965>:
 
 - ✅ Frontend loads correctly
 - ✅ Can login/logout
@@ -156,7 +156,7 @@ services.msc
 ### After Service Installation
 
 1. Service auto-starts on Windows boot
-2. Open browser: <http://localhost:5000>
+2. Open browser: <http://localhost:1965>
 3. Install PWA (click install button)
 4. Launch from desktop/start menu
 
@@ -185,11 +185,11 @@ Or use the deploy script:
 
 ## Troubleshooting
 
-### "Port 5000 already in use"
+### "Port 1965 already in use"
 
 ```powershell
 # Find what's using the port
-netstat -ano | findstr :5000
+netstat -ano | findstr :1965
 
 # Kill the process (replace PID)
 taskkill /PID <PID> /F
@@ -219,7 +219,7 @@ yarn service:restart
 
 1. Check browser console for errors
 2. Verify API URL in frontend: `/api/v1`
-3. Test API directly: <http://localhost:5000/api/v1/auth/login>
+3. Test API directly: <http://localhost:1965/api/v1/auth/login>
 4. Check backend logs
 
 ## Configuration Files
@@ -227,7 +227,7 @@ yarn service:restart
 ### Backend Environment (`backend/.env`)
 
 ```env
-PORT=5000
+PORT=1965
 DATABASE_URL="file:./prisma/dev.db"
 JWT_SECRET="your-secret-key"
 JWT_EXPIRATION="7d"

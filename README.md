@@ -43,7 +43,7 @@ yarn dev
 ```
 
 - Frontend: <http://localhost:3000>
-- Backend API: <http://localhost:5000/api/v1>
+- Backend API: <http://localhost:1965/api/v1>
 
 #### Production Build & Deploy
 
@@ -57,7 +57,7 @@ yarn service:install
 yarn service:start
 ```
 
-- Application: <http://localhost:5000>
+- Application: <http://localhost:1965>
 
 ## 📁 Project Structure
 
@@ -156,7 +156,7 @@ BananeV2/
 #### Backend (`backend/.env`)
 
 ```env
-PORT=5000
+PORT=1965
 DATABASE_URL="file:./dev.db"
 JWT_SECRET="your-super-secret-jwt-key"
 JWT_EXPIRATION="7d"
@@ -272,7 +272,7 @@ For production deployment:
 ### Service won't start
 
 - Check logs: `C:\ProgramData\BananeV2 Production Manager\daemon\`
-- Verify port availability: `netstat -ano | findstr :5000`
+- Verify port availability: `netstat -ano | findstr :1965`
 - Ensure build completed: Check `backend\dist` folder
 
 ### Frontend not loading

@@ -115,7 +115,7 @@ function Start-AppService {
     yarn service:start
     Start-Sleep -Seconds 3
     Write-Host ""
-    Write-Host "🌐 Application should be available at: http://localhost:5000" -ForegroundColor Cyan
+    Write-Host "🌐 Application should be available at: http://localhost:1965" -ForegroundColor Cyan
     Set-Location $rootPath
 }
 
@@ -132,7 +132,7 @@ function Restart-AppService {
     yarn service:restart
     Start-Sleep -Seconds 3
     Write-Host ""
-    Write-Host "🌐 Application should be available at: http://localhost:5000" -ForegroundColor Cyan
+    Write-Host "🌐 Application should be available at: http://localhost:1965" -ForegroundColor Cyan
     Set-Location $rootPath
 }
 

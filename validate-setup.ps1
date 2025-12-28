@@ -187,10 +187,10 @@ if ($service) {
 
 # Check Port Availability
 Write-Host "Checking Port Availability..." -ForegroundColor Cyan
-$portInUse = Get-NetTCPConnection -LocalPort 5000 -ErrorAction SilentlyContinue
+$portInUse = Get-NetTCPConnection -LocalPort 1965 -ErrorAction SilentlyContinue
 if ($portInUse) {
-    $warnings += "Port 5000 is already in use. Service may fail to start."
-    Write-Host "  ⚠️  Port 5000 is in use" -ForegroundColor Yellow
+    $warnings += "Port 1965 is already in use. Service may fail to start."
+    Write-Host "  ⚠️  Port 1965 is in use" -ForegroundColor Yellow
     $portInUse | ForEach-Object {
         $process = Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue
         if ($process) {
@@ -198,7 +198,7 @@ if ($portInUse) {
         }
     }
 } else {
-    Write-Host "  ✅ Port 5000 is available" -ForegroundColor Green
+    Write-Host "  ✅ Port 1965 is available" -ForegroundColor Green
 }
 
 # Summary
