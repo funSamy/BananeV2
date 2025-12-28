@@ -6,9 +6,10 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "prestart": "yarn generate && yarn migrate",
+    "prestart": "yarn generate && yarn migrate:dev",
     "generate": "prisma generate",
-    "migrate": "prisma migrate dev",
+    "migrate:dev": "prisma migrate dev",
+    "migrate": "prisma migrate deploy",
     "build": "yarn generate && yarn migrate && nest build",
     "build:full": "yarn build && cd ../frontend && yarn build:production",
     "format": "prettier --write \"src/**/*.ts\"",

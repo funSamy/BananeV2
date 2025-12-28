@@ -19,7 +19,7 @@ async function bootstrap() {
     origin: [
       'http://localhost',
       'http://localhost:3000',
-      'http://localhost:5000',
+      'http://localhost:1965',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
@@ -74,7 +74,7 @@ async function bootstrap() {
     }
   });
 
-  const port = process.env.PORT ?? 5000;
+  const port = process.env.PORT ?? 1965;
   await app.listen(port);
 
   console.log(`🚀 Application is running on: http://localhost:${port}`);

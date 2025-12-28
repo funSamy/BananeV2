@@ -21,7 +21,7 @@ const svc = new Service({
     },
     {
       name: 'PORT',
-      value: '5000',
+      value: '1965',
     },
     {
       name: 'VITE_API_URL',
