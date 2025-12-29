@@ -1,23 +1,45 @@
-"use client"
+import * as React from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { DayPicker } from "react-day-picker";
+import { type Locale } from "date-fns/locale";
+import { format } from "date-fns";
 
-import * as React from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker } from "react-day-picker"
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
 
-import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
+/**
+ * Capitalizes the first letter of a string
+ */
+function capitalizeFirst(str: string): string {
+  if (!str) return str;
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>
+export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
+  locale?: Locale;
+};
 
 function Calendar({
   className,
   classNames,
   showOutsideDays = true,
+  locale,
   ...props
 }: CalendarProps) {
   return (
     <div className="bg-background border border-secondary rounded-md shadow-md">
       <DayPicker
+        locale={locale}
+        formatters={{
+          formatCaption: (date, options) => {
+            if (!locale) {
+              const formatted = format(date, "MMMM yyyy");
+              return capitalizeFirst(formatted);
+            }
+            const formatted = format(date, "MMMM yyyy", { locale, ...options });
+            return capitalizeFirst(formatted);
+          },
+        }}
         showOutsideDays={showOutsideDays}
         className={cn("p-3", className)}
         classNames={{
@@ -77,4 +99,4 @@ function Calendar({
 }
 Calendar.displayName = "Calendar";
 
-export { Calendar }
+export { Calendar };

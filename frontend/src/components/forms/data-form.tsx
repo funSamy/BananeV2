@@ -25,6 +25,7 @@ import {
 } from "@radix-ui/react-popover";
 import { CalendarIcon, Loader, Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
+import { enUS, fr } from "date-fns/locale";
 import {
   Control,
   useFieldArray,
@@ -197,7 +198,9 @@ export const DataForm = forwardRef<DataFormRef, DataFormProps>(
     { onSubmit, isSubmitting = false, defaultValues, submitLabel = "Submit" },
     ref
   ) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const language = i18n.language || "en";
+    const locale = language === "fr" ? fr : enUS;
     const form = useForm<InputDataType>({
       resolver: zodResolver(formSchema),
       defaultValues: useMemo(
@@ -260,7 +263,7 @@ export const DataForm = forwardRef<DataFormRef, DataFormProps>(
                         )}
                       >
                         {field.value ? (
-                          format(field.value, "PPP")
+                          format(field.value, "PPP", { locale })
                         ) : (
                           <span>{t("form.pickDate")}</span>
                         )}
@@ -270,6 +273,7 @@ export const DataForm = forwardRef<DataFormRef, DataFormProps>(
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <MemoizedCalendar
+                      locale={locale}
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}

@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { DateRange } from "react-day-picker";
+import { enUS, fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -9,6 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useTranslation } from "react-i18next";
 
 interface DatePickerWithRangeProps {
   className?: string;
@@ -23,6 +25,10 @@ export function DatePickerWithRange({
   setDate,
   text,
 }: DatePickerWithRangeProps) {
+  const { i18n } = useTranslation();
+  const language = i18n.language || "en";
+  const locale = language === "fr" ? fr : enUS;
+
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>
@@ -39,11 +45,11 @@ export function DatePickerWithRange({
             {date?.from ? (
               date.to ? (
                 <>
-                  {format(date.from, "LLL dd, y")} -{" "}
-                  {format(date.to, "LLL dd, y")}
+                  {format(date.from, "LLL dd, y", { locale })} -{" "}
+                  {format(date.to, "LLL dd, y", { locale })}
                 </>
               ) : (
-                format(date.from, "LLL dd, y")
+                format(date.from, "LLL dd, y", { locale })
               )
             ) : (
               <span>{text}</span>
@@ -52,6 +58,7 @@ export function DatePickerWithRange({
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
+            locale={locale}
             initialFocus
             mode="range"
             defaultMonth={date?.from}
