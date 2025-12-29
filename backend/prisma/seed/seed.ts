@@ -1,8 +1,15 @@
-import { PrismaClient } from '@prisma/client';
-// import { ProdSeedData } from './proData';
+import { PrismaBunSqlite } from "prisma-adapter-bun-sqlite";
+import { PrismaClient } from '../../prisma/generated/prisma/client';
+import path from 'node:path';
 
 async function main() {
+  const dbPath = process.env.DATABASE_URL
+    ? process.env.DATABASE_URL
+    : `file:${path.join(process.cwd(), 'prisma', 'dev.db')}`;
   const prisma = new PrismaClient({
+    adapter: new PrismaBunSqlite({
+      url: dbPath,
+    }),
     errorFormat: 'pretty',
     transactionOptions: {
       maxWait: 120_000, // Maximum wait time for a transaction

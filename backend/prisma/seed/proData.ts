@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from 'prisma/generated/prisma/client';
 import { CreateProductionDto } from 'src/production/dto/create-production.dto';
 import { ExpenditureDto } from 'src/production/dto/expenditure.dto';
 

@@ -4,7 +4,7 @@ import {
   ValidationPipe,
   BadRequestException,
 } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from '../../app.module';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateProductionDto } from '../dto/create-production.dto';

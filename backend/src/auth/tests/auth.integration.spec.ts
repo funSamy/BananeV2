@@ -1,9 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from '../../app.module';
 import { PrismaService } from '../../prisma/prisma.service';
-import * as bcrypt from 'bcrypt';
 
 describe('Auth (Integration)', () => {
   let app: INestApplication;
@@ -39,7 +38,11 @@ describe('Auth (Integration)', () => {
   describe('/auth/login (POST)', () => {
     it('should authenticate user and return token', async () => {
       const password = 'password123';
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await Bun.password.hash(password, {
+        algorithm: 'argon2id',
+        memoryCost: 4,
+        timeCost: 3,
+      });
 
       // Create test user
       const user = await prisma.user.create({

@@ -29,19 +29,27 @@ export class ProductionService {
   async create(createProductionDto: CreateProductionDto) {
     const { expenditures, ...productionData } = createProductionDto;
 
-    // Convert date string to Date object
+    // Convert date string to Date object and normalize to midnight UTC
     const dateObj = new Date(productionData.date);
+    // Normalize to midnight UTC to ensure consistent date comparison
+    const normalizedDate = new Date(
+      Date.UTC(
+        dateObj.getUTCFullYear(),
+        dateObj.getUTCMonth(),
+        dateObj.getUTCDate(),
+      ),
+    );
 
     // Check if record with the same date exists
     const existingData = await this.prisma.productionData.findUnique({
       where: {
-        date: dateObj.toISOString().split('T')[0],
+        date: normalizedDate,
       },
     });
 
     if (existingData) {
       throw new ConflictException(
-        `Data for ${dateObj.toISOString()} already exists`,
+        `Data for ${normalizedDate.toISOString()} already exists`,
       );
     }
 
@@ -49,6 +57,11 @@ export class ProductionService {
     // If no previous data, assume stock starts at produced amount
 
     const last = await this.prisma.productionData.findFirst({
+      where: {
+        date: {
+          lt: normalizedDate,
+        },
+      },
       orderBy: {
         date: 'desc',
       },
@@ -63,7 +76,7 @@ export class ProductionService {
     const data = await this.prisma.productionData.create({
       data: {
         ...productionData,
-        date: dateObj,
+        date: normalizedDate,
         remains,
         stock,
         expenditures: {

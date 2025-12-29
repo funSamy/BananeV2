@@ -3,11 +3,11 @@ import { AuthService } from '../auth.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { UnauthorizedException, NotFoundException } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
 
 describe('AuthService', () => {
   let service: AuthService;
   let prisma: PrismaService;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let jwtService: JwtService;
 
   const mockPrismaService = {
@@ -52,7 +52,11 @@ describe('AuthService', () => {
       const user = {
         id: 1,
         email: loginDto.email,
-        password: await bcrypt.hash(loginDto.password, 10),
+        password: await Bun.password.hash(loginDto.password, {
+          algorithm: 'argon2id',
+          memoryCost: 4,
+          timeCost: 3,
+        }),
       };
 
       mockPrismaService.user.findUnique.mockResolvedValue(user);
@@ -61,13 +65,10 @@ describe('AuthService', () => {
       const result = await service.login(loginDto);
 
       expect(result).toEqual({
-        success: true,
-        data: {
-          token: 'jwt_token',
-          user: {
-            id: user.id,
-            email: user.email,
-          },
+        token: 'jwt_token',
+        user: {
+          id: user.id,
+          email: user.email,
         },
       });
     });
@@ -84,7 +85,11 @@ describe('AuthService', () => {
       const user = {
         id: 1,
         email: loginDto.email,
-        password: await bcrypt.hash('different_password', 10),
+        password: await Bun.password.hash('different_password', {
+          algorithm: 'argon2id',
+          memoryCost: 4,
+          timeCost: 3,
+        }),
       };
 
       mockPrismaService.user.findUnique.mockResolvedValue(user);
@@ -108,6 +113,7 @@ describe('AuthService', () => {
       expect(result).toEqual({
         success: true,
         message: 'Password reset instructions sent to email',
+        data: { token: expect.any(String) },
       });
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: user.id },

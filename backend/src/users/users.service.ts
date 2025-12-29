@@ -1,7 +1,6 @@
 import { Injectable, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -17,8 +16,12 @@ export class UsersService {
       throw new ConflictException('Email already exists');
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Hash password using Bun's built-in Argon2id
+    const hashedPassword = await Bun.password.hash(password, {
+      algorithm: 'argon2id',
+      memoryCost: 4, // memory usage in kibibytes
+      timeCost: 3, // the number of iterations
+    });
 
     // Create user
     const user = await this.prisma.user.create({

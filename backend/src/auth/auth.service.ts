@@ -8,7 +8,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 import * as speakeasy from 'speakeasy';
 import { GenerateOtpDto } from './dto/generate-otp.dto';
@@ -35,7 +34,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const isPasswordValid = await bcrypt.compare(
+    const isPasswordValid = await Bun.password.verify(
       loginDto.password,
       user.password,
     );
@@ -107,7 +106,11 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired token');
     }
 
-    const hashedPassword = await bcrypt.hash(resetPasswordDto.newPassword, 10);
+    const hashedPassword = await Bun.password.hash(resetPasswordDto.newPassword, {
+      algorithm: 'argon2id',
+      memoryCost: 4, // memory usage in kibibytes
+      timeCost: 3, // the number of iterations
+    });
 
     await this.prisma.user.update({
       where: { id: user.id },

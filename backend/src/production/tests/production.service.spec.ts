@@ -14,8 +14,11 @@ describe('ProductionService', () => {
       create: jest.fn(),
       findMany: jest.fn(),
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
       delete: jest.fn(),
+      deleteMany: jest.fn(),
       count: jest.fn(),
     },
   };
@@ -64,7 +67,6 @@ describe('ProductionService', () => {
       const result = await service.create(createDto);
 
       expect(result).toEqual({
-        success: true,
         data: expectedResult,
         message: 'Production data created successfully',
       });
@@ -111,7 +113,6 @@ describe('ProductionService', () => {
       });
 
       expect(result).toEqual({
-        success: true,
         data: {
           items: mockProductionData,
           pagination: {
@@ -167,7 +168,6 @@ describe('ProductionService', () => {
       const result = await service.findOne(1);
 
       expect(result).toEqual({
-        success: true,
         data: mockProduction,
       });
     });
@@ -238,7 +238,6 @@ describe('ProductionService', () => {
       const result = await service.remove(1);
 
       expect(result).toEqual({
-        success: true,
         message: 'Production data deleted successfully',
       });
       expect(prisma.productionData.delete).toHaveBeenCalledWith({
