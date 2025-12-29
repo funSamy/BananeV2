@@ -96,7 +96,7 @@ function Install-Service {
     Set-Location $backendPath
     
     # Make sure everything is built first
-    if (-not (Test-Path ".\backend\dist\src\main.js")) {
+    if (-not (Test-Path "$backendPath\dist\main.js")) {
         Write-Host "⚠️  Backend not built. Building now..." -ForegroundColor Yellow
         $buildSuccess = Build-Backend
         if (-not $buildSuccess) {

@@ -111,7 +111,7 @@ echo.
 cd /d "%BACKEND_PATH%"
 
 :: Check if backend is built
-if not exist "dist\src\main.js" (
+if not exist "%BACKEND_PATH%\dist\main.js" (
     echo WARNING: Backend not built. Building now...
     call :BUILD_BACKEND_FUNC
     if !errorlevel! neq 0 (

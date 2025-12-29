@@ -60,7 +60,7 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
 
   // Serve static files from frontend build
-  const frontendPath = join(__dirname, '..', '..', '..', 'frontend', 'dist');
+  const frontendPath = join(__dirname, '..', '..', 'frontend', 'dist');
   app.useStaticAssets(frontendPath, {
     index: false, // Disable automatic index serving to handle SPA routing
   });
