@@ -20,7 +20,9 @@
     "actions": "Actions",
     "toggleTheme": "Changer le thème",
     "openSidebar": "Ouvrir la barre latérale",
-    "switchLanguage": "Changer de langue"
+    "switchLanguage": "Changer de langue",
+    "details": "Détails",
+    "total": "Total"
   },
   "404": {
     "title": "La page que vous cherchez n'a pas été trouver",
@@ -102,7 +104,8 @@
     "editSuccess": "Données mises à jour avec succès !",
     "editFailed": "Échec de la mise à jour des données",
     "saveChanges": "Enregistrer les modifications",
-    "failedToLoad": "Échec du chargement des données."
+    "failedToLoad": "Échec du chargement des données.",
+    "expendituresList": "Liste de toutes les dépenses pour"
   },
   "form": {
     "date": "Date",
@@ -131,9 +134,9 @@
     "remains": "Reste",
     "expenditures": "Dépenses",
     "actions": "Actions",
-    "rowsPerPage": "Lignes par page",
+    "rowsPerPage": "Rangées par page",
     "pageOf": "Page {{current}} sur {{total}}",
-    "selected": "{{count}} sur {{total}} ligne(s) sélectionnée(s).",
+    "selected": "{{count}} sur {{total}} rangée(s) sélectionnée(s).",
     "goToFirstPage": "Aller à la première page",
     "goToPreviousPage": "Aller à la page précédente",
     "goToNextPage": "Aller à la page suivante",

@@ -1,4 +1,10 @@
-import { memo, useCallback, useMemo } from "react";
+import {
+  memo,
+  useCallback,
+  useMemo,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -19,7 +25,12 @@ import {
 } from "@radix-ui/react-popover";
 import { CalendarIcon, Loader, Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
-import { Control, useFieldArray, useForm } from "react-hook-form";
+import {
+  Control,
+  useFieldArray,
+  useForm,
+  UseFormReturn,
+} from "react-hook-form";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
 
@@ -176,154 +187,167 @@ interface DataFormProps {
   submitLabel?: string;
 }
 
-export function DataForm({
-  onSubmit,
-  isSubmitting = false,
-  defaultValues,
-  submitLabel = "Submit",
-}: DataFormProps) {
-  const { t } = useTranslation();
-  const form = useForm<InputDataType>({
-    resolver: zodResolver(formSchema),
-    defaultValues: useMemo(
-      () => ({
-        date: new Date(new Date().setHours(0, 0, 0, 0)),
-        remains: 0,
-        produced: 0,
-        ...defaultValues,
-      }),
-      [defaultValues]
-    ),
-  });
+export interface DataFormRef {
+  setError: UseFormReturn<InputDataType>["setError"];
+  reset: UseFormReturn<InputDataType>["reset"];
+}
 
-  const { fields, append, remove } = useFieldArray({
-    name: "expenditures",
-    control: form.control,
-  });
+export const DataForm = forwardRef<DataFormRef, DataFormProps>(
+  function DataForm(
+    { onSubmit, isSubmitting = false, defaultValues, submitLabel = "Submit" },
+    ref
+  ) {
+    const { t } = useTranslation();
+    const form = useForm<InputDataType>({
+      resolver: zodResolver(formSchema),
+      defaultValues: useMemo(
+        () => ({
+          date: new Date(new Date().setHours(0, 0, 0, 0)),
+          remains: 0,
+          produced: 0,
+          ...defaultValues,
+        }),
+        [defaultValues]
+      ),
+    });
 
-  const handleNumericInput = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (!ALLOWED_KEYS.includes(e.key) && !/[0-9]/.test(e.key)) {
-        e.preventDefault();
-      }
-    },
-    []
-  );
+    const { fields, append, remove } = useFieldArray({
+      name: "expenditures",
+      control: form.control,
+    });
 
-  return (
-    <Form {...form}>
-      <form
-        onSubmit={(e) => {
+    // Expose form methods via ref
+    useImperativeHandle(ref, () => ({
+      setError: form.setError,
+      reset: form.reset,
+    }));
+
+    const handleNumericInput = useCallback(
+      (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (!ALLOWED_KEYS.includes(e.key) && !/[0-9]/.test(e.key)) {
           e.preventDefault();
-          form.handleSubmit((d) => onSubmit({ ...d, id: defaultValues?.id }))(
-            e
-          );
-        }}
-        className="space-y-8"
-      >
-        {/* Date Field */}
-        <FormField
-          control={form.control}
-          name="date"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel className="text-primary">{t("form.date")}</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-[240px] pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>{t("form.pickDate")}</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <MemoizedCalendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date: Date) =>
-                      date > MAX_DATE || date < MIN_DATE
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        }
+      },
+      []
+    );
 
-        {/* Numeric Fields */}
-        {["purchased", "produced", "sales"].map((fieldName) => (
+    return (
+      <Form {...form}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit((d) => onSubmit({ ...d, id: defaultValues?.id }))(
+              e
+            );
+          }}
+          className="space-y-8"
+        >
+          {/* Date Field */}
           <FormField
-            key={fieldName}
             control={form.control}
-            name={fieldName as "purchased" | "produced" | "sales"}
+            name="date"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t(`form.${fieldName}`)}</FormLabel>
-                <FormControl>
-                  <MemoizedInput
-                    type="text"
-                    pattern="[0-9]*"
-                    inputMode="numeric"
-                    onKeyDown={handleNumericInput}
-                    placeholder={t("form.enterAmountFor", { field: fieldName })}
-                    {...field}
-                  />
-                </FormControl>
+              <FormItem className="flex flex-col">
+                <FormLabel className="text-primary">{t("form.date")}</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-[240px] pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>{t("form.pickDate")}</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <MemoizedCalendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date: Date) =>
+                        date > MAX_DATE || date < MIN_DATE
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
                 <FormMessage />
               </FormItem>
             )}
           />
-        ))}
 
-        {/* Expenditures */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <FormLabel>{t("form.expenditures")}</FormLabel>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="gap-2"
-              onClick={() => append({ name: "", amount: 0 })}
-            >
-              <Plus className="h-4 w-4" />
-              {t("form.addExpenditure")}
-            </Button>
-          </div>
-
-          {fields.map((field, index) => (
-            <ExpenditureField
-              key={field.id}
-              index={index}
+          {/* Numeric Fields */}
+          {["purchased", "produced", "sales"].map((fieldName) => (
+            <FormField
+              key={fieldName}
               control={form.control}
-              remove={remove}
-              t={t}
+              name={fieldName as "purchased" | "produced" | "sales"}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t(`form.${fieldName}`)}</FormLabel>
+                  <FormControl>
+                    <MemoizedInput
+                      type="text"
+                      pattern="[0-9]*"
+                      inputMode="numeric"
+                      onKeyDown={handleNumericInput}
+                      placeholder={t("form.enterAmountFor", {
+                        field: fieldName,
+                      })}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           ))}
-        </div>
 
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? (
-            <Loader className="animate-spin text-primaryForeground" />
-          ) : (
-            submitLabel
-          )}
-        </Button>
-      </form>
-    </Form>
-  );
-}
+          {/* Expenditures */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <FormLabel>{t("form.expenditures")}</FormLabel>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => append({ name: "", amount: 0 })}
+              >
+                <Plus className="h-4 w-4" />
+                {t("form.addExpenditure")}
+              </Button>
+            </div>
+
+            {fields.map((field, index) => (
+              <ExpenditureField
+                key={field.id}
+                index={index}
+                control={form.control}
+                remove={remove}
+                t={t}
+              />
+            ))}
+          </div>
+
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <Loader className="animate-spin text-primaryForeground" />
+            ) : (
+              submitLabel
+            )}
+          </Button>
+        </form>
+      </Form>
+    );
+  }
+);

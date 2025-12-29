@@ -28,12 +28,11 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { columns } from "./columns";
+import { createColumns } from "./columns";
 import { ChevronDown, Loader2, AlertCircle } from "lucide-react";
 import { DatePickerWithRange } from "@/components/ui/date-range-picker";
 import type { DateRange } from "react-day-picker";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
-import { format } from "date-fns";
 import { DataForm } from "@/components/forms/data-form";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DataEntry } from "@/types/data";
@@ -41,6 +40,8 @@ import { toast } from "sonner";
 import { useProductionTable } from "@/hooks/production/use-production-table";
 import { useUpdateProduction } from "@/hooks/production/use-production-data";
 import { useTranslation } from "react-i18next";
+import { formatDateForAPI, formatMonthRange } from "@/lib/utils/date-utils";
+import i18n from "@/i18n/config";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -93,7 +94,7 @@ export default function DataTablePage() {
           id,
           data: {
             ...rest,
-            date: rest.date.toISOString(),
+            date: formatDateForAPI(rest.date),
           },
         });
         toast.success(t("dataTable.editSuccess"), {
@@ -107,6 +108,8 @@ export default function DataTablePage() {
     },
     [updateMutation, t]
   );
+
+  const columns = createColumns(t);
 
   const table = useReactTable<DataEntry>({
     data: tableData?.data ?? [],
@@ -163,17 +166,20 @@ export default function DataTablePage() {
   }, [date, table]);
 
   // Get unique months from visible rows
-  const visibleMonths = table
+  const visibleDates = table
     .getRowModel()
-    .rows.map((row) => format(row.getValue("date"), "MMMM yyyy"))
-    .filter((value, index, self) => self.indexOf(value) === index)
-    .sort();
+    .rows.map((row) => row.getValue("date") as Date)
+    .sort((a, b) => a.getTime() - b.getTime());
 
   const monthsDisplay =
-    visibleMonths.length > 0
-      ? visibleMonths.length === 1
-        ? visibleMonths[0]
-        : `${visibleMonths[0]} - ${visibleMonths[visibleMonths.length - 1]}`
+    visibleDates.length > 0
+      ? formatMonthRange(
+          visibleDates[0],
+          visibleDates.length > 1
+            ? visibleDates[visibleDates.length - 1]
+            : undefined,
+          i18n.language || "en"
+        )
       : t("common.noData");
 
   return (
@@ -207,16 +213,31 @@ export default function DataTablePage() {
                   .getAllColumns()
                   .filter((column) => column.getCanHide())
                   .map((column) => {
+                    // Map column IDs to translation keys
+                    const getColumnLabel = (columnId: string): string => {
+                      const translationMap: Record<string, string> = {
+                        date: "table.date",
+                        purchased: "table.purchased",
+                        produced: "table.produced",
+                        stock: "table.stock",
+                        sales: "table.sales",
+                        remains: "table.remains",
+                        expenditures: "table.expenditures",
+                        actions: "table.actions",
+                      };
+                      const translationKey = translationMap[columnId];
+                      return translationKey ? t(translationKey) : columnId;
+                    };
+
                     return (
                       <DropdownMenuCheckboxItem
                         key={column.id}
-                        className="capitalize"
                         checked={column.getIsVisible()}
                         onCheckedChange={(value) =>
                           column.toggleVisibility(!!value)
                         }
                       >
-                        {column.id}
+                        {getColumnLabel(column.id)}
                       </DropdownMenuCheckboxItem>
                     );
                   })}
@@ -294,7 +315,7 @@ export default function DataTablePage() {
           </Table>
         </div>
         <div className="py-4">
-          <DataTablePagination table={table} />
+          <DataTablePagination table={table} t={t} />
         </div>
       </div>
 

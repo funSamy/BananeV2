@@ -20,7 +20,9 @@
     "actions": "Actions",
     "toggleTheme": "Toggle theme",
     "openSidebar": "Open sidebar",
-    "switchLanguage": "Switch language"
+    "switchLanguage": "Switch language",
+    "details": "Details",
+    "total": "Total"
   },
   "404": {
     "title": "The page your are looking for was not found",
@@ -102,7 +104,8 @@
     "editSuccess": "Data updated successfully!",
     "editFailed": "Failed to update data",
     "saveChanges": "Save Changes",
-    "failedToLoad": "Failed to load data."
+    "failedToLoad": "Failed to load data.",
+    "expendituresList": "List of all expenditures for"
   },
   "form": {
     "date": "Date",
