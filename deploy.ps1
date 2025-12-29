@@ -157,7 +157,7 @@ function Run-Development {
     Write-Host ""
     Write-Host "Terminal 1 - Backend:" -ForegroundColor Yellow
     Write-Host "  cd backend" -ForegroundColor Gray
-    Write-Host "  yarn start:dev" -ForegroundColor Gray
+    Write-Host "  bun run start:dev" -ForegroundColor Gray
     Write-Host ""
     Write-Host "Terminal 2 - Frontend:" -ForegroundColor Yellow
     Write-Host "  cd frontend" -ForegroundColor Gray

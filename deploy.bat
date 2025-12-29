@@ -193,7 +193,7 @@ echo You'll need two terminal windows:
 echo.
 echo Terminal 1 - Backend:
 echo   cd backend
-echo   yarn start:dev
+echo   bun run start:dev
 echo.
 echo Terminal 2 - Frontend:
 echo   cd frontend

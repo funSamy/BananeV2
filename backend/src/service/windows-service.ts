@@ -13,7 +13,7 @@ const svc = new Service({
   name: serviceName,
   description: serviceDescription,
   script: scriptPath,
-  nodeOptions: ['--harmony', '--max_old_space_size=4096'],
+  // nodeOptions not needed as wrapper uses Node.js to spawn Bun
   env: [
     {
       name: 'NODE_ENV',
@@ -28,8 +28,6 @@ const svc = new Service({
       value: process.env.VITE_API_URL,
     },
   ],
-  //   workingDirectory: join(__dirname, '..', '..'),
-  //   allowServiceLogon: true,
 });
 
 svc.workingdirectory = join(__dirname, '..', '..');
@@ -56,8 +54,10 @@ export function installService() {
   console.log('📦 Installing Windows Service...');
   console.log(`   Service Name: ${serviceName}`);
   console.log(`   Description: ${serviceDescription}`);
-  console.log(`   Script Path: ${scriptPath}`);
-  console.log('\n⚠️  Note: This requires Administrator privileges!\n');
+  console.log(`   Runtime: Bun (via wrapper script)`);
+  console.log(`   Wrapper Script: ${scriptPath}`);
+  console.log('\n⚠️  Note: This requires Administrator privileges!');
+  console.log('   The wrapper script will automatically detect and use Bun.\n');
 
   svc.install();
 }
@@ -153,7 +153,7 @@ if (require.main === module) {
       console.log(`
 🔧 BananeV2 Windows Service Manager
 
-Usage: node windows-service.js [command]
+Usage: bun windows-service.js [command]
 
 Commands:
   install     Install the service (requires Administrator)
@@ -163,14 +163,15 @@ Commands:
   restart     Restart the service
 
 Examples:
-  node dist/service/windows-service.js install
-  node dist/service/windows-service.js start
-  node dist/service/windows-service.js stop
-  node dist/service/windows-service.js restart
-  node dist/service/windows-service.js uninstall
+  bun dist/service/windows-service.js install
+  bun dist/service/windows-service.js start
+  bun dist/service/windows-service.js stop
+  bun dist/service/windows-service.js restart
+  bun dist/service/windows-service.js uninstall
 
 ⚠️  Note: Install and uninstall commands require Administrator privileges.
          Run PowerShell or Command Prompt as Administrator.
+         Service will run using Bun runtime.
       `);
       process.exit(1);
   }

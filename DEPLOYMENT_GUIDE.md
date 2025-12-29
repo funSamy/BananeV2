@@ -14,12 +14,13 @@ The application is now configured as a **single-server architecture**:
 ```
 ┌─────────────────────────────────────────┐
 │         BananeV2 Application            │
-│  (Single Node.js Process on Port 1965) │
+│  (Single Bun Process on Port 1965)     │
 ├─────────────────────────────────────────┤
 │                                         │
 │  ┌───────────────────────────────────┐ │
 │  │  NestJS Backend (API Server)      │ │
 │  │  Routes: /api/v1/*                │ │
+│  │  Runtime: Bun                     │ │
 │  └───────────────────────────────────┘ │
 │                                         │
 │  ┌───────────────────────────────────┐ │
@@ -33,10 +34,33 @@ The application is now configured as a **single-server architecture**:
 
 ## Prerequisites
 
-- **Node.js**: v18 or higher
-- **Yarn**: Package manager
+- **Bun**: v1.0 or higher (for backend runtime)
+- **Node.js**: v18 or higher (for frontend build tools)
+- **Yarn**: Package manager (for frontend)
 - **Windows OS**: For Windows service functionality
 - **Administrator privileges**: Required for service installation
+
+### Installing Bun
+
+If you don't have Bun installed, you can install it using:
+
+**PowerShell:**
+
+```powershell
+powershell -c "irm bun.sh/install.ps1 | iex"
+```
+
+**Or using npm:**
+
+```powershell
+npm install -g bun
+```
+
+Verify installation:
+
+```powershell
+bun --version
+```
 
 ## Step 1: Build the Application
 
@@ -85,8 +109,10 @@ Before setting up as a service, test that everything works:
 
 ```powershell
 # From backend directory
-yarn start:prod
+bun run start:prod
 ```
+
+**Note:** The backend now runs on Bun runtime, which provides faster startup times and better performance compared to Node.js.
 
 Then open your browser and navigate to:
 
@@ -280,8 +306,9 @@ To completely remove the service:
 
 ```powershell
 # Run as Administrator
-yarn service:stop
-yarn service:uninstall
+cd backend
+bun run service:stop
+bun run service:uninstall
 ```
 
 ## Security Considerations
@@ -295,29 +322,28 @@ yarn service:uninstall
 - [ ] Set up proper Windows service account (not Local System)
 - [ ] Enable logging and monitoring
 - [ ] Regular backups of database
-- [ ] Keep Node.js and dependencies updated
+- [ ] Keep Bun and dependencies updated
 
 ### Recommended: Set Up HTTPS
 
 For production, use IIS or nginx as a reverse proxy:
 
 ```
-[Browser] --HTTPS--> [IIS/nginx:443] --HTTP--> [Node.js:1965]
+[Browser] --HTTPS--> [IIS/nginx:443] --HTTP--> [Bun:1965]
 ```
 
 ## Performance Tips
 
-1. **Increase Node.js memory** (edit `src/service/windows-service.ts`):
+1. **Bun Runtime Benefits**:
+   - Bun provides faster startup times and better performance than Node.js
+   - No need to configure memory options (Bun handles this automatically)
+   - Built-in TypeScript support and faster module resolution
 
-   ```typescript
-   nodeOptions: ['--max_old_space_size=8192']
-   ```
-
-2. **Enable PM2 for production** (alternative to Windows service):
+2. **Alternative: PM2 for production** (if you prefer PM2 over Windows service):
 
    ```powershell
    npm install -g pm2
-   pm2 start dist/main.js --name banane-v2
+   pm2 start bun --name banane-v2 -- dist/src/main.js
    pm2 startup windows
    pm2 save
    ```
@@ -334,7 +360,8 @@ For issues or questions:
 - Check logs in service daemon folder
 - Review error messages in Windows Event Viewer
 - Ensure all dependencies are installed
-- Verify Node.js version compatibility
+- Verify Bun is installed and accessible: `bun --version`
+- Verify Bun can find the service script: `bun run dist/src/service/windows-service.js`
 
 ## Next Steps
 
