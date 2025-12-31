@@ -106,11 +106,14 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired token');
     }
 
-    const hashedPassword = await Bun.password.hash(resetPasswordDto.newPassword, {
-      algorithm: 'argon2id',
-      memoryCost: 4, // memory usage in kibibytes
-      timeCost: 3, // the number of iterations
-    });
+    const hashedPassword = await Bun.password.hash(
+      resetPasswordDto.newPassword,
+      {
+        algorithm: 'argon2id',
+        memoryCost: 4, // memory usage in kibibytes
+        timeCost: 3, // the number of iterations
+      },
+    );
 
     await this.prisma.user.update({
       where: { id: user.id },

@@ -19,6 +19,7 @@
     "start:debug": " bun x --bun nest start --debug --watch",
     "start:prod": "bun run dist/main.js",
     "seed": "ts-node -r tsconfig-paths/register prisma/seed/seed.ts",
+    "migrate:old-data": "bun prisma/migrate-old-data.ts",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",

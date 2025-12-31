@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '../../prisma/generated/prisma/client';
-import { PrismaBunSqlite } from "prisma-adapter-bun-sqlite";
+import { PrismaBunSqlite } from 'prisma-adapter-bun-sqlite';
 import * as path from 'path';
 
 @Injectable()
